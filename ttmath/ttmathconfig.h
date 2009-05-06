@@ -44,7 +44,7 @@ namespace ttmath
 		typedef std::wostream			tostrm_t;
 		typedef std::wistream			tistrm_t;
 	#else
-		typedef	unsigned char			tchar_t;
+		typedef	char					tchar_t;
 		typedef	std::string				tstr_t;
 		typedef std::ostringstream		tostrstrm_t;
 		typedef std::ostream			tostrm_t;
@@ -58,7 +58,7 @@ namespace ttmath
 	#endif
 	#define TTMATH_TEXT(quote) 	__TEXT(quote)
 #else
-	typedef	unsigned char			tchar_t;
+	typedef	char					tchar_t;
 	typedef	std::string				tstr_t;
 	typedef std::ostringstream		tostrstrm_t;
 	typedef std::ostream			tostrm_t;

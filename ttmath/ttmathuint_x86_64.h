@@ -41,7 +41,6 @@
 
 
 #ifndef TTMATH_NOASM
-#pragma message("ASM code included")
 #ifdef TTMATH_PLATFORM64
 
 /*!

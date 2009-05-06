@@ -133,20 +133,15 @@ namespace ttmath
 	typedef unsigned long long int ulint;
 
 	/*!
-		how many bits there are in the uint type
-	*/
-	#define TTMATH_BITS_PER_UINT 32u
-
-	/*!
 		the mask for the highest bit in the unsigned 32bit word (2^31)
 	*/
-	#define TTMATH_UINT_HIGHEST_BIT 2147483648u
+	#define TTMATH_UINT_HIGHEST_BIT 0x80000000ul
 
 	/*!
 		the max value of the unsigned 32bit word (2^32 - 1)
 		(all bits equal one)
 	*/
-	#define TTMATH_UINT_MAX_VALUE 4294967295u
+	#define TTMATH_UINT_MAX_VALUE 0xfffffffful
 
 	/*!
 		the number of words (32bit words on 32bit platform)
@@ -177,11 +172,6 @@ namespace ttmath
 	//typedef unsigned long long int ulint;
 
 	/*!
-		how many bits there are in the uint type
-	*/
-	#define TTMATH_BITS_PER_UINT 64ul
-
-	/*!
 		the mask for the highest bit in the unsigned 64bit word (2^63)
 	*/
 	#define TTMATH_UINT_HIGHEST_BIT 0x8000000000000000ul
@@ -200,6 +190,8 @@ namespace ttmath
 	#define TTMATH_BUILTIN_VARIABLES_SIZE 128ul
 
 #endif
+
+	#define TTMATH_BITS_PER_UINT (sizeof(uint)*8)
 }
 
 
@@ -412,10 +404,10 @@ namespace ttmath
 		#if defined(__FILE__) && defined(__LINE__)
 
 			#define TTMATH_REFERENCE_ASSERT(expression) \
-				if( &(expression) == this ) throw ttmath::ReferenceError(__FILE__, __LINE__);
+				if( &(expression) == this ) throw ttmath::ReferenceError(TTMATH_TEXT(__FILE__), __LINE__);
 
 			#define TTMATH_ASSERT(expression) \
-				if( !(expression) ) throw ttmath::RuntimeError(__FILE__, __LINE__);
+				if( !(expression) ) throw ttmath::RuntimeError(TTMATH_TEXT(__FILE__), __LINE__);
 
 		#else
 
