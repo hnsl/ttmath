@@ -41,8 +41,8 @@
 
 
 #ifndef TTMATH_NOASM
+#pragma message("ASM code included")
 #ifdef TTMATH_PLATFORM64
-
 
 /*!
 	\file ttmathuint_x86_64.h
@@ -54,6 +54,24 @@
 
 namespace ttmath
 {
+
+	#if defined(_M_IX64)
+		#include <intrin.h>
+
+		extern "C"
+			{
+			uint	__fastcall	adc_x64(uint* p1, const uint* p2, uint nSize, uint c);
+			uint	__fastcall	addindexed_x64(uint* p1, uint nSize, uint nPos, uint nValue);
+			uint	__fastcall	addindexed2_x64(uint* p1, uint nSize, uint nPos, uint nValue1, uint nValue2);
+			uint	__fastcall	sbb_x64(uint* p1, const uint* p2, uint nSize, uint c);
+			uint	__fastcall	subindexed_x64(uint* p1, uint nSize, uint nPos, uint nValue);
+			uint	__fastcall	rcl_x64(uint* p1, uint nSize, uint nLowestBit);
+			uint	__fastcall	rcr_x64(uint* p1, uint nSize, uint nLowestBit);
+			uint	__fastcall	div_x64(uint* pnValHi, uint* pnValLo, uint nDiv);
+			uint	__fastcall	rcl2_x64(uint* p1, uint nSize, uint nBits, uint c);
+			uint	__fastcall	rcr2_x64(uint* p1, uint nSize, uint nBits, uint c);
+			};
+	#endif
 
 	/*!
 	*
@@ -78,16 +96,20 @@ namespace ttmath
 	uint b = value_size;
 	uint * p1 = table;
 	const uint * p2 = ss2.table;
-	uint dummy, dummy2;
 
 		// we don't have to use TTMATH_REFERENCE_ASSERT here
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = adc_x64(p1,p2,b,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+			uint dummy, dummy2;
 			/*
 				this part should be compiled with gcc
 			*/
@@ -145,15 +167,19 @@ namespace ttmath
 	uint b = value_size;
 	uint * p1 = table;
 	uint c;
-	uint dummy, dummy2;
 
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = addindexed_x64(p1,b,index,value);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+			uint dummy, dummy2;
 
 			__asm__ __volatile__(
 
@@ -223,15 +249,20 @@ namespace ttmath
 	uint b = value_size;
 	uint * p1 = table;
 	uint c;
-	uint dummy, dummy2;
 
 		TTMATH_ASSERT( index < value_size - 1 )
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = addindexed2_x64(p1,b,index,x2,x1);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+			uint dummy, dummy2;
+			
 			__asm__ __volatile__(
 			
 				"subq %%rdx, %%rcx 				\n"
@@ -284,16 +315,21 @@ namespace ttmath
 	uint b = value_size;
 	uint * p1 = table;
 	const uint * p2 = ss2.table;
-	uint dummy, dummy2;
 
 		// we don't have to use TTMATH_REFERENCE_ASSERT here
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = sbb_x64(p1,p2,b,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+			uint dummy, dummy2;
+			
 			__asm__  __volatile__(
 	
 				"xorq %%rdx, %%rdx				\n"
@@ -347,15 +383,20 @@ namespace ttmath
 	uint b = value_size;
 	uint * p1 = table;
 	uint c;
-	uint dummy, dummy2;
 
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = subindexed_x64(p1,b,index,value);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+			uint dummy, dummy2;
+			
 			__asm__ __volatile__(
 			
 				"subq %%rdx, %%rcx 				\n"
@@ -404,13 +445,18 @@ namespace ttmath
 	{
 	sint b = value_size;
 	uint * p1 = table;
-	uint dummy, dummy2;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = rcl_x64(p1,b,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+		uint dummy, dummy2;
+		
 		__asm__  __volatile__(
 		
 			"xorq %%rdx, %%rdx			\n"   // rdx=0
@@ -456,13 +502,18 @@ namespace ttmath
 	{
 	sint b = value_size;
 	uint * p1 = table;
-	uint dummy;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = rcr_x64(p1,b,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+		uint dummy;
+		
 		__asm__  __volatile__(
 
 			"neg %%rax						\n"   // CF=1 if rax!=0 , CF=0 if rax==0
@@ -509,13 +560,18 @@ namespace ttmath
 
 	uint b = value_size;
 	uint * p1 = table;
-	uint dummy, dummy2, dummy3;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = rcl2_x64(p1,b,bits,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
+		uint dummy, dummy2, dummy3;
+		
 		__asm__  __volatile__(
 		
 			"movq %%rcx, %%rsi				\n"
@@ -580,14 +636,19 @@ namespace ttmath
 
 	sint b = value_size;
 	uint * p1 = table;
-	uint dummy, dummy2, dummy3;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_M_IX64)
+				c = rcr2_x64(p1,b,bits,c);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 
 		#ifdef __GNUC__
+			uint dummy, dummy2, dummy3;
+			
 			__asm__  __volatile__(
 
 			"movq %%rcx, %%rsi				\n"
@@ -646,7 +707,16 @@ namespace ttmath
 	register sint result;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_MSC_VER)
+				unsigned long	nIndex(0);
+
+				if (_BitScanReverse64(&nIndex,x) == 0)
+					result = -1;
+				  else
+					result = nIndex;
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
@@ -691,7 +761,11 @@ namespace ttmath
 
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_MSC_VER)
+				old_bit = _bittestandset((long*)&value,bit) != 0;
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
@@ -747,7 +821,11 @@ namespace ttmath
 	register uint result2_;
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_MSC_VER)
+				result1_ = _umul128(a,b,&result2_);
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__
@@ -804,7 +882,13 @@ namespace ttmath
 		TTMATH_ASSERT( c != 0 )
 
 		#ifndef __GNUC__
-			#error "another compiler than GCC is currently not supported in 64bit mode"
+			#if defined(_MSC_VER)
+				div_x64(&a,&b,c);
+				r_ = a;
+				rest_ = b;
+			#else
+				#error "another compiler than GCC is currently not supported in 64bit mode"
+			#endif
 		#endif
 
 		#ifdef __GNUC__

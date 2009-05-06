@@ -256,7 +256,7 @@ public:
 		bool function;
 
 		// if function is true
-		std::string function_name;
+		tstr_t function_name;
 
 		/*
 			the sign of value
@@ -310,11 +310,11 @@ ErrorCode error;
 
 
 /*!
-	pointer to the currently reading char
+	pointer to the currently reading tchar_t
 
 	when an error has occured it may be used to count the index of the wrong character
 */
-const char * pstring;
+const tchar_t * pstring;
 
 
 /*!
@@ -351,7 +351,7 @@ const Objects * puser_variables;
 const Objects * puser_functions;
 
 
-typedef std::map<std::string, ValueType> FunctionLocalVariables;
+typedef std::map<tstr_t, ValueType> FunctionLocalVariables;
 
 /*!
 	a pointer to the local variables of a function
@@ -362,13 +362,13 @@ const FunctionLocalVariables * pfunction_local_variables;
 /*!
 	a temporary set using during parsing user defined variables
 */
-std::set<std::string> visited_variables;
+std::set<tstr_t> visited_variables;
 
 
 /*!
 	a temporary set using during parsing user defined functions
 */
-std::set<std::string> visited_functions;
+std::set<tstr_t> visited_functions;
 
 
 
@@ -396,10 +396,10 @@ typedef void (ValueType::*pfunction_var)();
 	table of mathematic functions
 
 	this map consists of:
-		std::string - function's name
+		tstr_t - function's name
 		pfunction   - pointer to specific function
 */
-typedef std::map<std::string, pfunction> FunctionsTable;
+typedef std::map<tstr_t, pfunction> FunctionsTable;
 FunctionsTable functions_table;
 
 
@@ -407,10 +407,10 @@ FunctionsTable functions_table;
 	table of mathematic operators
 
 	this map consists of:
-		std::string - operators's name
+		tstr_t - operators's name
 		MatOperator::Type - type of the operator
 */
-typedef std::map<std::string, typename MatOperator::Type> OperatorsTable;
+typedef std::map<tstr_t, typename MatOperator::Type> OperatorsTable;
 OperatorsTable operators_table;
 
 
@@ -418,10 +418,10 @@ OperatorsTable operators_table;
 	table of mathematic variables
 
 	this map consists of:
-		std::string   - variable's name
+		tstr_t   - variable's name
 		pfunction_var - pointer to specific function which returns value of variable
 */
-typedef std::map<std::string, pfunction_var> VariablesTable;
+typedef std::map<tstr_t, pfunction_var> VariablesTable;
 VariablesTable variables_table;
 
 
@@ -456,7 +456,7 @@ void SkipWhiteCharacters()
 /*!
 	an auxiliary method for RecurrenceParsingVariablesOrFunction(...)
 */
-void RecurrenceParsingVariablesOrFunction_CheckStopCondition(bool variable, const std::string & name)
+void RecurrenceParsingVariablesOrFunction_CheckStopCondition(bool variable, const tstr_t & name)
 {
 	if( variable )
 	{
@@ -474,7 +474,7 @@ void RecurrenceParsingVariablesOrFunction_CheckStopCondition(bool variable, cons
 /*!
 	an auxiliary method for RecurrenceParsingVariablesOrFunction(...)
 */
-void RecurrenceParsingVariablesOrFunction_AddName(bool variable, const std::string & name)
+void RecurrenceParsingVariablesOrFunction_AddName(bool variable, const tstr_t & name)
 {
 	if( variable )
 		visited_variables.insert( name );
@@ -486,7 +486,7 @@ void RecurrenceParsingVariablesOrFunction_AddName(bool variable, const std::stri
 /*!
 	an auxiliary method for RecurrenceParsingVariablesOrFunction(...)
 */
-void RecurrenceParsingVariablesOrFunction_DeleteName(bool variable, const std::string & name)
+void RecurrenceParsingVariablesOrFunction_DeleteName(bool variable, const tstr_t & name)
 {
 	if( variable )
 		visited_variables.erase( name );
@@ -505,7 +505,7 @@ void RecurrenceParsingVariablesOrFunction_DeleteName(bool variable, const std::s
 	(there can be a recurrence here therefore we're using 'visited_variables'
 	and 'visited_functions' sets to make a stop condition)
 */
-ValueType RecurrenceParsingVariablesOrFunction(bool variable, const std::string & name, const char * new_string, FunctionLocalVariables * local_variables = 0)
+ValueType RecurrenceParsingVariablesOrFunction(bool variable, const tstr_t & name, const tchar_t * new_string, FunctionLocalVariables * local_variables = 0)
 {
 	RecurrenceParsingVariablesOrFunction_CheckStopCondition(variable, name);
 	RecurrenceParsingVariablesOrFunction_AddName(variable, name);
@@ -548,12 +548,12 @@ public:
 /*!
 	this method returns the user-defined value of a variable
 */
-bool GetValueOfUserDefinedVariable(const std::string & variable_name,ValueType & result)
+bool GetValueOfUserDefinedVariable(const tstr_t & variable_name,ValueType & result)
 {
 	if( !puser_variables )
 		return false;
 
-	const char * string_value;
+	const tchar_t * string_value;
 
 	if( puser_variables->GetValue(variable_name, &string_value) != err_ok )
 		return false;
@@ -567,7 +567,7 @@ return true;
 /*!
 	this method returns the value of a local variable of a function
 */
-bool GetValueOfFunctionLocalVariable(const std::string & variable_name, ValueType & result)
+bool GetValueOfFunctionLocalVariable(const tstr_t & variable_name, ValueType & result)
 {
 	if( !pfunction_local_variables )
 		return false;
@@ -589,7 +589,7 @@ return true;
 	we make an object of type ValueType then call a method which 
 	sets the correct value in it and finally we'll return the object
 */
-ValueType GetValueOfVariable(const std::string & variable_name)
+ValueType GetValueOfVariable(const tstr_t & variable_name)
 {
 ValueType result;
 
@@ -600,7 +600,7 @@ ValueType result;
 		return result;
 
 
-	typename std::map<std::string, pfunction_var>::iterator i =
+	typename std::map<tstr_t, pfunction_var>::iterator i =
 													variables_table.find(variable_name);
 
 	if( i == variables_table.end() )
@@ -1338,12 +1338,12 @@ void Avg(int sindex, int amount_of_args, ValueType & result)
 
 	(look at the description in 'CallFunction(...)')
 */
-bool GetValueOfUserDefinedFunction(const std::string & function_name, int amount_of_args, int sindex)
+bool GetValueOfUserDefinedFunction(const tstr_t & function_name, int amount_of_args, int sindex)
 {
 	if( !puser_functions )
 		return false;
 
-	const char * string_value;
+	const tchar_t * string_value;
 	int param;
 
 	if( puser_functions->GetValueAndParam(function_name, &string_value, &param) != err_ok )
@@ -1357,7 +1357,7 @@ bool GetValueOfUserDefinedFunction(const std::string & function_name, int amount
 
 	if( amount_of_args > 0 )
 	{
-		char buffer[20];
+		tchar_t buffer[20];
 
 		// x = x1
 		sprintf(buffer,"x");
@@ -1389,7 +1389,7 @@ return true;
 	result will be stored in 'stack[sindex-1].value'
 	(we don't have to set the correct type of this element, it'll be set later)
 */
-void CallFunction(const std::string & function_name, int amount_of_args, int sindex)
+void CallFunction(const tstr_t & function_name, int amount_of_args, int sindex)
 {
 	if( GetValueOfUserDefinedFunction(function_name, amount_of_args, sindex) )
 		return;
@@ -1415,9 +1415,9 @@ void CallFunction(const std::string & function_name, int amount_of_args, int sin
 	function_name - name of the function
 	pf - pointer to the function (to the wrapper)
 */
-void InsertFunctionToTable(const char * function_name, pfunction pf)
+void InsertFunctionToTable(const tchar_t * function_name, pfunction pf)
 {
-	functions_table.insert( std::make_pair(std::string(function_name), pf));
+	functions_table.insert( std::make_pair(tstr_t(function_name), pf));
 }
 
 
@@ -1428,9 +1428,9 @@ void InsertFunctionToTable(const char * function_name, pfunction pf)
 	variable_name - name of the function
 	pf - pointer to the function
 */
-void InsertVariableToTable(const char * variable_name, pfunction_var pf)
+void InsertVariableToTable(const tchar_t * variable_name, pfunction_var pf)
 {
-	variables_table.insert( std::make_pair(std::string(variable_name), pf));
+	variables_table.insert( std::make_pair(tstr_t(variable_name), pf));
 }
 
 
@@ -1538,7 +1538,7 @@ return c;
 	what should be returned is tested just by a '(' character that means if there's
 	a '(' character after a name that function returns 'true'
 */
-bool ReadName(std::string & result)
+bool ReadName(tstr_t & result)
 {
 int character;
 
@@ -1610,7 +1610,7 @@ return false;
 */
 bool ReadVariableOrFunction(Item & result)
 {
-std::string name;
+tstr_t name;
 bool is_it_name_of_function = ReadName(name);
 
 	if( is_it_name_of_function )
@@ -1639,7 +1639,7 @@ return is_it_name_of_function;
 */
 void ReadValue(Item & result, int reading_base)
 {
-const char * new_stack_pointer;
+const tchar_t * new_stack_pointer;
 bool value_read;
 
 	int carry = result.value.FromString(pstring, reading_base, &new_stack_pointer, &value_read);
@@ -1812,7 +1812,7 @@ return 0;
 }
 
 
-void InsertOperatorToTable(const std::string & name, typename MatOperator::Type type)
+void InsertOperatorToTable(const tstr_t & name, typename MatOperator::Type type)
 {
 	operators_table.insert( std::make_pair(name, type) );
 }
@@ -1823,19 +1823,19 @@ void InsertOperatorToTable(const std::string & name, typename MatOperator::Type 
 */
 void CreateMathematicalOperatorsTable()
 {
-	InsertOperatorToTable(std::string("||"), MatOperator::lor);
-	InsertOperatorToTable(std::string("&&"), MatOperator::land);
-	InsertOperatorToTable(std::string("!="), MatOperator::neq);
-	InsertOperatorToTable(std::string("=="), MatOperator::eq);
-	InsertOperatorToTable(std::string(">="), MatOperator::get);
-	InsertOperatorToTable(std::string("<="), MatOperator::let);
-	InsertOperatorToTable(std::string(">"),  MatOperator::gt);
-	InsertOperatorToTable(std::string("<"),  MatOperator::lt);
-	InsertOperatorToTable(std::string("-"),  MatOperator::sub);
-	InsertOperatorToTable(std::string("+"),  MatOperator::add);
-	InsertOperatorToTable(std::string("/"),  MatOperator::div);
-	InsertOperatorToTable(std::string("*"),  MatOperator::mul);
-	InsertOperatorToTable(std::string("^"),  MatOperator::pow);
+	InsertOperatorToTable(tstr_t("||"), MatOperator::lor);
+	InsertOperatorToTable(tstr_t("&&"), MatOperator::land);
+	InsertOperatorToTable(tstr_t("!="), MatOperator::neq);
+	InsertOperatorToTable(tstr_t("=="), MatOperator::eq);
+	InsertOperatorToTable(tstr_t(">="), MatOperator::get);
+	InsertOperatorToTable(tstr_t("<="), MatOperator::let);
+	InsertOperatorToTable(tstr_t(">"),  MatOperator::gt);
+	InsertOperatorToTable(tstr_t("<"),  MatOperator::lt);
+	InsertOperatorToTable(tstr_t("-"),  MatOperator::sub);
+	InsertOperatorToTable(tstr_t("+"),  MatOperator::add);
+	InsertOperatorToTable(tstr_t("/"),  MatOperator::div);
+	InsertOperatorToTable(tstr_t("*"),  MatOperator::mul);
+	InsertOperatorToTable(tstr_t("^"),  MatOperator::pow);
 }
 
 
@@ -1845,12 +1845,12 @@ void CreateMathematicalOperatorsTable()
 	e.g.
 	true when str1="test" and str2="te"
 */
-bool IsSubstring(const std::string & str1, const std::string & str2)
+bool IsSubstring(const tstr_t & str1, const tstr_t & str2)
 {
 	if( str2.length() > str1.length() )
 		return false;
 
-	for(std::string::size_type i=0 ; i<str2.length() ; ++i)
+	for(tstr_t::size_type i=0 ; i<str2.length() ; ++i)
 		if( str1[i] != str2[i] )
 			return false;
 
@@ -1863,7 +1863,7 @@ return true;
 */
 void ReadMathematicalOperator(Item & result)
 {
-std::string oper;
+tstr_t oper;
 typename OperatorsTable::iterator iter_old, iter_new;
 
 	iter_old = operators_table.end();
@@ -2510,7 +2510,7 @@ void SetFactorialMax(const ValueType & m)
 /*!
 	the main method using for parsing string
 */
-ErrorCode Parse(const char * str)
+ErrorCode Parse(const tchar_t * str)
 {
 	stack_index  = 0;
 	pstring      = str;

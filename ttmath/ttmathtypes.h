@@ -160,9 +160,13 @@ namespace ttmath
 	/*!
 		on 64bit platforms one word (uint, sint) will be equal 64bits
 	*/
-	typedef unsigned long uint;
-	typedef signed   long sint;
-
+	#if defined(_MSC_VER)
+		typedef unsigned __int64 uint;
+		typedef signed __int64 sint;
+	#else
+		typedef unsigned long long uint;
+		typedef signed long long sint;
+	#endif
 	/*!
 		on 64bit platform we do not define ulint
 		sizeof(long long) is 8 (64bit) but we need 128bit
@@ -180,13 +184,13 @@ namespace ttmath
 	/*!
 		the mask for the highest bit in the unsigned 64bit word (2^63)
 	*/
-	#define TTMATH_UINT_HIGHEST_BIT 9223372036854775808ul
+	#define TTMATH_UINT_HIGHEST_BIT 0x8000000000000000ul
 
 	/*!
 		the max value of the unsigned 64bit word (2^64 - 1)
 		(all bits equal one)
 	*/
-	#define TTMATH_UINT_MAX_VALUE 18446744073709551615ul
+	#define TTMATH_UINT_MAX_VALUE 0xfffffffffffffffful
 
 	/*!
 		the number of words (64bit words on 64bit platforms)
@@ -300,20 +304,20 @@ namespace ttmath
 	*/
 	class ExceptionInfo
 	{
-	const char * file;
+	const tchar_t * file;
 	int line;
 
 	public:
 		ExceptionInfo() : file(0), line(0) {}
-		ExceptionInfo(const char * f, int l) : file(f), line(l) {}
+		ExceptionInfo(const tchar_t * f, int l) : file(f), line(l) {}
 
-		std::string Where() const
+		tstr_t Where() const
 		{
 			if( !file )
-				return "unknown";
+				return(TTMATH_TEXT("unknown"));
 
-			std::ostringstream result;
-			result << file << ":" << line;
+			tostrstrm_t result;
+			result << file << TTMATH_TEXT(":") << line;
 
 		return result.str();
 		}
@@ -327,7 +331,7 @@ namespace ttmath
 		can throw an exception of this type
 
 		If you compile with gcc you can get a small benefit 
-		from using method Where() (it returns std::string with
+		from using method Where() (it returns tstr_t with
 		the name and the line of a file where the macro TTMATH_REFERENCE_ASSERT
 		was used)
 
@@ -355,12 +359,12 @@ namespace ttmath
 		{
 		}
 
-		ReferenceError(const char * f, int l) :
+		ReferenceError(const tchar_t * f, int l) :
 							std::logic_error ("reference error"), ExceptionInfo(f,l)
 		{
 		}
 
-		std::string Where() const
+		tstr_t Where() const
 		{
 			return ExceptionInfo::Where();
 		}
@@ -375,7 +379,7 @@ namespace ttmath
 		of this type
 
 		if you compile with gcc you can get a small benefit 
-		from using method Where() (it returns std::string with
+		from using method Where() (it returns tstr_t with
 		the name and the line of a file where the macro TTMATH_ASSERT
 		was used)
 	*/
@@ -387,12 +391,12 @@ namespace ttmath
 		{
 		}
 
-		RuntimeError(const char * f, int l) :
+		RuntimeError(const tchar_t * f, int l) :
 						std::runtime_error ("internal error"), ExceptionInfo(f,l)
 		{
 		}
 
-		std::string Where() const
+		tstr_t Where() const
 		{
 			return ExceptionInfo::Where();
 		}

@@ -45,6 +45,7 @@
     \brief Mathematics functions.
 */
 
+#include "ttmathconfig.h"
 #include "ttmathbig.h"
 #include "ttmathobjects.h"
 

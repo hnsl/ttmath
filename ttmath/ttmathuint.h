@@ -50,7 +50,9 @@
 
 #include "ttmathtypes.h"
 
-
+#if defined(_MSC_VER)
+	#pragma warning(disable:4127) // conditional expression is constant
+#endif
 
 /*!
     \brief a namespace for the TTMath library
@@ -84,7 +86,7 @@ public:
 
 		it prints the table in a nice form of several columns
 	*/
-	void PrintTable(std::ostream & output) const
+	void PrintTable(tostrm_t & output) const
 	{
 		// how many columns there'll be
 		const int columns = 8;
@@ -118,7 +120,7 @@ public:
 	}
 
 
-	void PrintLog(const char * msg, std::ostream & output) const
+	void PrintLog(const tchar_t * msg, tostrm_t & output) const
 	{
 		output << msg << std::endl;
 
@@ -1473,7 +1475,7 @@ private:
 	bool Div2_DivisorGreaterOrEqual(	const UInt<value_size> & divisor,
 										UInt<value_size> * remainder, 
 										uint table_id, uint index,
-										uint divisor_table_id, uint divisor_index  )
+										uint /*divisor_table_id*/, uint divisor_index  )
 	{
 		if( divisor_index > index )
 		{
@@ -1604,7 +1606,7 @@ private:
 		for(uint i = j+1 ; i<value_size ; ++i)
 			q.table[i] = 0;
 
-		while( true )
+		for (;;)
 		{
 			u1 = table[j+n-1];
 			u0 = table[j+n-2];
@@ -2005,7 +2007,7 @@ public:
 
 
 	/*!
-		this method converts a digit into a char
+		this method converts a digit into a tchar_t
 		digit should be from <0,F>
 		(we don't have to get a base)
 		
@@ -2141,7 +2143,7 @@ public:
 		this constant 10 has the int type (signed int), if we don't give such
 		operators and constructors the compiler will not compile the program,
 		because it has to make a conversion and doesn't know into which type
-		(the UInt class has operator=(const char*), operator=(uint) etc.)
+		(the UInt class has operator=(const tchar_t*), operator=(uint) etc.)
 	*/
 	UInt<value_size> & operator=(sint i)
 	{
@@ -2256,18 +2258,18 @@ public:
 	/*!
 		a constructor for converting a string to this class (with the base=10)
 	*/
-	UInt(const char * s)
+	UInt(const tchar_t * s)
 	{
 		FromString(s);
 
-		TTMATH_LOG("UInt::UInt(const char *)")
+		TTMATH_LOG("UInt::UInt(const tchar_t *)")
 	}
 
 
 	/*!
 		a constructor for converting a string to this class (with the base=10)
 	*/
-	UInt(const std::string & s)
+	UInt(const tstr_t & s)
 	{
 		FromString( s.c_str() );
 	}
@@ -2332,10 +2334,10 @@ public:
 	/*!	
 		this method converts the value to a string with a base equal 'b'
 	*/
-	void ToString(std::string & result, uint b = 10) const
+	void ToString(tstr_t & result, uint b = 10) const
 	{
 	UInt<value_size> temp( *this );
-	char character;
+	tchar_t character;
 	uint rem;
 
 		result.clear();
@@ -2360,7 +2362,7 @@ public:
 	/*
 		this method's ommiting any white characters from the string
 	*/
-	static void SkipWhiteCharacters(const char * & c)
+	static void SkipWhiteCharacters(const tchar_t * & c)
 	{
 		while( (*c==' ' ) || (*c=='\t') || (*c==13 ) || (*c=='\n') )
 			++c;
@@ -2384,7 +2386,7 @@ public:
 
 		value_read (if exists) tells whether something has actually been read (at least one digit)
 	*/
-	uint FromString(const char * s, uint b = 10, const char ** after_source = 0, bool * value_read = 0)
+	uint FromString(const tchar_t * s, uint b = 10, const tchar_t ** after_source = 0, bool * value_read = 0)
 	{
 	UInt<value_size> base( b );
 	UInt<value_size> temp;
@@ -2434,7 +2436,7 @@ public:
 
 		(it returns carry=1 if the value will be too big or an incorrect base 'b' is given)
 	*/
-	uint FromString(const std::string & s, uint b = 10)
+	uint FromString(const tstr_t & s, uint b = 10)
 	{
 		return FromString( s.c_str(), b );
 	}
@@ -2444,11 +2446,11 @@ public:
 	/*!
 		this operator converts a string into its value (with base = 10)
 	*/
-	UInt<value_size> & operator=(const char * s)
+	UInt<value_size> & operator=(const tchar_t * s)
 	{
 		FromString(s);
 
-		TTMATH_LOG("UInt::operator=(const char *)")
+		TTMATH_LOG("UInt::operator=(const tchar_t *)")
 
 	return *this;
 	}
@@ -2457,7 +2459,7 @@ public:
 	/*!
 		this operator converts a string into its value (with base = 10)
 	*/
-	UInt<value_size> & operator=(const std::string & s)
+	UInt<value_size> & operator=(const tstr_t & s)
 	{
 		FromString( s.c_str() );
 
@@ -2825,9 +2827,9 @@ public:
 	*
 	*/
 
-	friend std::ostream & operator<<(std::ostream & s, const UInt<value_size> & l)
+	friend tostrm_t & operator<<(tostrm_t & s, const UInt<value_size> & l)
 	{
-	std::string ss;
+	tstr_t ss;
 
 		l.ToString(ss);
 		s << ss;
@@ -2837,12 +2839,12 @@ public:
 
 
 
-	friend std::istream & operator>>(std::istream & s, UInt<value_size> & l)
+	friend tistrm_t & operator>>(tistrm_t & s, UInt<value_size> & l)
 	{
-	std::string ss;
+	tstr_t ss;
 	
-	// char for operator>>
-	unsigned char z;
+	// tchar_t for operator>>
+	tchar_t z;
 	
 		// operator>> omits white characters if they're set for ommiting
 		s >> z;
@@ -2924,6 +2926,10 @@ public:
 
 
 } //namespace
+
+#if defined(_MSC_VER)
+	#pragma warning(default:4127) // conditional expression is constant
+#endif
 
 
 #include "ttmathuint_x86.h"

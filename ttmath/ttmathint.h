@@ -47,6 +47,10 @@
 
 #include "ttmathuint.h"
 
+#if defined(_MSC_VER)
+	#pragma warning(disable:4127) // conditional expression is constant
+#endif
+
 namespace ttmath
 {
 
@@ -641,8 +645,14 @@ public:
 
 		// there can be a carry here when the size of this value is equal one word
 		// and the 'value' has the highest bit set
+		#if defined(_MSC_VER)
+			#pragma warning(disable:4127) // conditional expression is constant
+		#endif
 		if( value_size==1 && (value & TTMATH_UINT_HIGHEST_BIT)!=0 )
 			return 1;
+		#if defined(_MSC_VER)
+			#pragma warning(default:4127) // conditional expression is constant
+		#endif
 
 	return 0;
 	}
@@ -821,7 +831,7 @@ public:
 	/*!
 		a constructor for converting string to this class (with the base=10)
 	*/
-	Int(const char * s)
+	Int(const tchar_t * s)
 	{
 		FromString(s);
 	}
@@ -830,7 +840,7 @@ public:
 	/*!
 		a constructor for converting a string to this class (with the base=10)
 	*/
-	Int(const std::string & s)
+	Int(const tstr_t & s)
 	{
 		FromString( s.c_str() );
 	}
@@ -869,7 +879,7 @@ public:
 	/*!	
 		this method converts the value to a string with a base equal 'b'
 	*/
-	void ToString(std::string & result, uint b = 10) const
+	void ToString(tstr_t & result, uint b = 10) const
 	{
 		if( IsSign() )
 		{
@@ -904,7 +914,7 @@ public:
 
 		value_read (if exists) tells whether something has actually been read (at least one digit)
 	*/
-	uint FromString(const char * s, uint b = 10, const char ** after_source = 0, bool * value_read = 0)
+	uint FromString(const tchar_t * s, uint b = 10, const tchar_t ** after_source = 0, bool * value_read = 0)
 	{
 	bool is_sign = false;
 	
@@ -961,7 +971,7 @@ public:
 		this method converts a string into its value
 		it returns carry=1 if the value will be too big or an incorrect base 'b' is given
 	*/
-	uint FromString(const std::string & s, uint b = 10)
+	uint FromString(const tstr_t & s, uint b = 10)
 	{
 		return FromString( s.c_str() );
 	}
@@ -970,7 +980,7 @@ public:
 	/*!
 		this operator converts a string into its value (with base = 10)
 	*/
-	Int<value_size> & operator=(const char * s)
+	Int<value_size> & operator=(const tchar_t * s)
 	{
 		FromString(s);
 
@@ -981,7 +991,7 @@ public:
 	/*!
 		this operator converts a string into its value (with base = 10)
 	*/
-	Int<value_size> & operator=(const std::string & s)
+	Int<value_size> & operator=(const tstr_t & s)
 	{
 		FromString( s.c_str() );
 
@@ -1268,9 +1278,9 @@ public:
 	*
 	*/
 
-	friend std::ostream & operator<<(std::ostream & s, const Int<value_size> & l)
+	friend tostrm_t & operator<<(tostrm_t & s, const Int<value_size> & l)
 	{
-	std::string ss;
+	tstr_t ss;
 
 		l.ToString(ss);
 		s << ss;
@@ -1280,12 +1290,12 @@ public:
 
 
 
-	friend std::istream & operator>>(std::istream & s, Int<value_size> & l)
+	friend tistrm_t & operator>>(tistrm_t & s, Int<value_size> & l)
 	{
-	std::string ss;
+	tstr_t ss;
 	
-	// char for operator>>
-	unsigned char z;
+	// tchar_t for operator>>
+	unsigned tchar_t z;
 	
 		// operator>> omits white characters if they're set for ommiting
 		s >> z;
@@ -1315,6 +1325,10 @@ public:
 };
 
 } // namespace
+
+#if defined(_MSC_VER)
+	#pragma warning(default:4127) // conditional expression is constant
+#endif
 
 
 #endif
