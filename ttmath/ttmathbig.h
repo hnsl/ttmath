@@ -394,7 +394,7 @@ public:
 		// (TTMATH_BUILTIN_VARIABLES_SIZE on 32bit platform should have the value 256,
 		// and on 64bit platform value 128 (256/2=128))
 
-		mantissa.SetFromTable(temp_table, sizeof(temp_table) / sizeof(int));
+		mantissa.SetFromTable(temp_table, sizeof(temp_table) / sizeof(unsigned int));
 		exponent = -sint(man)*sint(TTMATH_BITS_PER_UINT);
 		info = 0;
 	}
@@ -659,7 +659,7 @@ public:
 			// there shouldn't be a carry here because
 			// (1) (2) guarantee that the mantissa of this
 			// is greater than or equal to the mantissa of the ss2
-			TTMATH_ASSERT( mantissa.Sub(ss2.mantissa) == 0 )
+			TTMATH_VERIFY( mantissa.Sub(ss2.mantissa) == 0 )
 		}
 
 		c += Standardizing();

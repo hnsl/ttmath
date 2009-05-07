@@ -135,20 +135,20 @@ namespace ttmath
 	/*!
 		the mask for the highest bit in the unsigned 32bit word (2^31)
 	*/
-	#define TTMATH_UINT_HIGHEST_BIT 0x80000000ul
+	const uint TTMATH_UINT_HIGHEST_BIT = 0x80000000ul;
 
 	/*!
 		the max value of the unsigned 32bit word (2^32 - 1)
 		(all bits equal one)
 	*/
-	#define TTMATH_UINT_MAX_VALUE 0xfffffffful
+	const uint TTMATH_UINT_MAX_VALUE = 0xfffffffful;
 
 	/*!
 		the number of words (32bit words on 32bit platform)
 		which are kept in built-in variables for a Big<> type
 		(these variables are defined in ttmathbig.h)
 	*/
-	#define TTMATH_BUILTIN_VARIABLES_SIZE 256u
+	const uint TTMATH_BUILTIN_VARIABLES_SIZE  = 256u;
 
 #else
 
@@ -174,24 +174,25 @@ namespace ttmath
 	/*!
 		the mask for the highest bit in the unsigned 64bit word (2^63)
 	*/
-	#define TTMATH_UINT_HIGHEST_BIT 0x8000000000000000ul
+	const uint TTMATH_UINT_HIGHEST_BIT = 0x8000000000000000ul;
 
 	/*!
 		the max value of the unsigned 64bit word (2^64 - 1)
 		(all bits equal one)
 	*/
-	#define TTMATH_UINT_MAX_VALUE 0xfffffffffffffffful
+	const uint TTMATH_UINT_MAX_VALUE = 0xfffffffffffffffful;
 
 	/*!
 		the number of words (64bit words on 64bit platforms)
 		which are kept in built-in variables for a Big<> type
 		(these variables are defined in ttmathbig.h)
 	*/
-	#define TTMATH_BUILTIN_VARIABLES_SIZE 128ul
+	const uint TTMATH_BUILTIN_VARIABLES_SIZE = 128ul;
 
 #endif
 
-	#define TTMATH_BITS_PER_UINT (sizeof(uint)*8)
+	const uint TTMATH_BITS_PER_UINT = (sizeof(uint)*8);
+
 }
 
 
@@ -343,7 +344,7 @@ namespace ttmath
 			foo.Add(foo);
 		but there are only few methods which can do that
 	*/
-	class ReferenceError : public std::logic_error, ExceptionInfo
+	class ReferenceError : public std::logic_error, public ExceptionInfo
 	{
 	public:
 
@@ -375,7 +376,7 @@ namespace ttmath
 		the name and the line of a file where the macro TTMATH_ASSERT
 		was used)
 	*/
-	class RuntimeError : public std::runtime_error, ExceptionInfo
+	class RuntimeError : public std::runtime_error, public ExceptionInfo
 	{
 	public:
 
@@ -409,6 +410,9 @@ namespace ttmath
 			#define TTMATH_ASSERT(expression) \
 				if( !(expression) ) throw ttmath::RuntimeError(TTMATH_TEXT(__FILE__), __LINE__);
 
+			#define TTMATH_VERIFY(expression) \
+				if( !(expression) ) throw ttmath::RuntimeError(TTMATH_TEXT(__FILE__), __LINE__);
+
 		#else
 
 			#define TTMATH_REFERENCE_ASSERT(expression) \
@@ -416,19 +420,32 @@ namespace ttmath
 
 			#define TTMATH_ASSERT(expression) \
 				if( !(expression) ) throw RuntimeError();
+
+			#define TTMATH_VERIFY(expression) \
+				if( !(expression) ) throw RuntimeError();
 		#endif
 
 	#else
 		#define TTMATH_REFERENCE_ASSERT(expression)
 		#define TTMATH_ASSERT(expression)
+		#define TTMATH_VERIFY(expression)	(void)(expression);
 	#endif
 
-
+	#if !defined(LOG_PRINTF)
+		#define LOG_PRINTF printf
+	#endif
 
 	#ifdef TTMATH_DEBUG_LOG
+	
+		#define TTMATH_LOG(pszMsg)								\
+		{														\
+			ttmath::tostrstrm_t	ss;								\
+			PrintLog(TTMATH_TEXT(pszMsg),ss);					\
+			LOG_PRINTF(TTMATH_TEXT("%s"),ss.str().c_str());	\
+		}
 
-		#define TTMATH_LOG(msg) \
-			PrintLog(msg, std::cout);		
+		//#define TTMATH_LOG(msg) \
+		//	PrintLog(msg, std::cout);		
 
 	#else
 

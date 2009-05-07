@@ -54,7 +54,7 @@
 namespace ttmath
 {
 
-	#if defined(_M_IX64)
+	#if defined(_M_X64)
 		#include <intrin.h>
 
 		extern "C"
@@ -100,7 +100,7 @@ namespace ttmath
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = adc_x64(p1,p2,b,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -170,7 +170,7 @@ namespace ttmath
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = addindexed_x64(p1,b,index,value);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -252,7 +252,7 @@ namespace ttmath
 		TTMATH_ASSERT( index < value_size - 1 )
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = addindexed2_x64(p1,b,index,x2,x1);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -319,7 +319,7 @@ namespace ttmath
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = sbb_x64(p1,p2,b,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -386,7 +386,7 @@ namespace ttmath
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = subindexed_x64(p1,b,index,value);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -446,7 +446,7 @@ namespace ttmath
 	uint * p1 = table;
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = rcl_x64(p1,b,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -503,7 +503,7 @@ namespace ttmath
 	uint * p1 = table;
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = rcr_x64(p1,b,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -561,7 +561,7 @@ namespace ttmath
 	uint * p1 = table;
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = rcl2_x64(p1,b,bits,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -637,7 +637,7 @@ namespace ttmath
 	uint * p1 = table;
 
 		#ifndef __GNUC__
-			#if defined(_M_IX64)
+			#if defined(_M_X64)
 				c = rcr2_x64(p1,b,bits,c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
@@ -761,7 +761,11 @@ namespace ttmath
 
 		#ifndef __GNUC__
 			#if defined(_MSC_VER)
-				old_bit = _bittestandset((long*)&value,bit) != 0;
+				#if defined(TTMATH_PLATFORM64)
+					old_bit = _bittestandset64((__int64*)&value,bit) != 0;
+				  #else
+					old_bit = _bittestandset((long*)&value,bit) != 0;
+				#endif
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
 			#endif

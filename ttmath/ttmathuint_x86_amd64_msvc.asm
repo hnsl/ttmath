@@ -11,7 +11,7 @@ PUBLIC	rcr_x64
 PUBLIC	rcl2_x64
 PUBLIC	rcr2_x64
 
-public	div_x64
+PUBLIC	div_x64
 
 ;
 ;	"rax, rcx, rdx, r8-r11 are volatile."

@@ -1923,7 +1923,7 @@ public:
 	*/
 	bool IsTheLowestBitSet() const
 	{
-		return (*table & 1) != 0;
+		return (table[0] & 1) != 0;
 	}
 
 
@@ -2017,12 +2017,12 @@ public:
 			10 -> A
 			15 -> F
 	*/
-	static uint DigitToChar(uint digit)
+	static tchar_t DigitToChar(uint digit)
 	{
 		if( digit < 10 )
-			return digit + '0';
+			return (tchar_t)(digit + '0');
 
-	return digit - 10 + 'A';
+	return((tchar_t)(digit - 10 + 'A'));
 	}
 
 
