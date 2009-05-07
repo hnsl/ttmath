@@ -2506,7 +2506,19 @@ public:
 	{
 		operator=(value);
 	}
-	
+
+	class LogHistory
+		{
+		public:
+			Big<exp,man>	val[15];
+			
+							LogHistory()
+								{
+								for (int i = 0; i < 15; ++i)
+									val[i].SetZero();
+								}
+		TTMATH_IMPLEMENT_THREADSAFE_OBJ
+		};
 
 	/*!
 		a method for converting the value into a string with a base equal 'base'
@@ -2793,11 +2805,12 @@ private:
 		// (LnSurrounding1() will return one immediately)
 		uint c = Ln(x);
 
-		// warning! this 'static' is not thread safe
-		static Big<exp,man> log_history[15] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		uint index = base - 2;
 
-		if( log_history[index].IsZero() )
+		static LogHistory	log_history;
+		TTMATH_USE_THREADSAFE_OBJ(log_history);
+		
+		if( log_history.val[index].IsZero() )
 		{	
 			// we don't have 'base' in 'log_history' then we calculate it now
 
@@ -2815,14 +2828,14 @@ private:
 
 			// the next time we'll get the 'Ln(base)' from the history,
 			// this 'log_history' can have (16-2+1) items max
-			log_history[index] = temp;
+			log_history.val[index] = temp;
 
 			c += Div(temp);
 		}
 		else
 		{
 			// we've calculated the 'Ln(base)' beforehand and we're getting it now
-			c += Div( log_history[index] );
+			c += Div( log_history.val[index] );
 		}
 
 	return (c==0)? 0 : 1;

@@ -57,12 +57,75 @@ namespace ttmath
 		#define __TEXT(quote) 	quote
 	#endif
 	#define TTMATH_TEXT(quote) 	__TEXT(quote)
-#else
+	
+	#if defined(_MT)
+		class 	clsCrit
+			{
+			private:
+				mutable CRITICAL_SECTION 		_Crit;
+
+												clsCrit(const clsCrit&) // inhibit copy (easy mistake to do; use clsCritObj instead!!!)
+													{
+													}
+				clsCrit&						operator=(const clsCrit& rhs); // inhibit assignment
+			public:
+												clsCrit(void)
+													{
+													::InitializeCriticalSection(&_Crit);
+													}
+				virtual							~clsCrit(void)
+													{
+													::DeleteCriticalSection(&_Crit);
+													}
+
+				void							Enter(void) const
+													{
+													::EnterCriticalSection(&_Crit);
+													}
+				void							Leave(void) const
+													{
+													::LeaveCriticalSection(&_Crit);
+													}
+			};
+
+		class 	clsCritObj
+			{
+			private:
+				const clsCrit&					_Crit;
+				
+				clsCritObj&						operator=(const clsCritObj& rhs); // not applicable
+			public:
+												clsCritObj(const clsCrit& Sync)
+													: _Crit(Sync)
+													{
+													_Crit.Enter();
+													}
+												~clsCritObj(void)
+													{
+													_Crit.Leave();
+													}
+			};
+		#define TTMATH_IMPLEMENT_THREADSAFE_OBJ					\
+			private:											\
+				clsCrit CritSect;								\
+			public:												\
+				operator clsCrit&()								\
+				{												\
+					return(CritSect);							\
+				}
+		#define TTMATH_USE_THREADSAFE_OBJ(c)	clsCritObj	lock(c)
+	#endif
+#else // not MS compiler
 	typedef	char					tchar_t;
 	typedef	std::string				tstr_t;
 	typedef std::ostringstream		tostrstrm_t;
 	typedef std::ostream			tostrm_t;
 	typedef std::istream			tistrm_t;
+#endif
+
+#if !defined(TTMATH_IMPLEMENT_THREADSAFE_OBJ)
+	#define TTMATH_IMPLEMENT_THREADSAFE_OBJ		/* */
+	#define TTMATH_USE_THREADSAFE_OBJ(c)		/* */
 #endif
 
 } // namespace

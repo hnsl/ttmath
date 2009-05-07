@@ -1951,6 +1951,8 @@ namespace ttmath
 		}
 
 		ErrorCode err_tmp;
+		
+		TTMATH_USE_THREADSAFE_OBJ(history);
 
 		if( history.Get(x, result, err_tmp) )
 		{

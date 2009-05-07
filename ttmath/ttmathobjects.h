@@ -487,6 +487,7 @@ public:
 	return false;
 	}
 
+	TTMATH_IMPLEMENT_THREADSAFE_OBJ	
 }; // end of class History
 
 
