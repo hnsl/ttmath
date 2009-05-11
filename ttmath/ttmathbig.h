@@ -954,7 +954,7 @@ public:
 
 	UInt<man*2> man1;
 	UInt<man*2> man2;
-	uint i,c;
+	uint i,c = 0;
 		
 		if( ss2.IsZero() )
 		{
@@ -978,7 +978,9 @@ public:
 
 		i = man1.CompensationToLeft();
 
-		c  = exponent.Sub(i);
+		if( i )
+			c += exponent.Sub(i);
+
 		c += exponent.Sub(ss2.exponent);
 		
 		for(i=0 ; i<man ; ++i)
@@ -999,8 +1001,8 @@ public:
 		the remainder from a division
 
 		e.g.
-		 12.6 mod  3 =  0.6   because 12.6 = 3*4 + 0.6
-		-12.6 mod  3 = -0.6
+		 12.6 mod  3 =  0.6   because  12.6 = 3*4 + 0.6
+		-12.6 mod  3 = -0.6   bacause -12.6 = 3*(-4) + (-0.6)
 		 12.6 mod -3 =  0.6
 		-12.6 mod -3 = -0.6
 
@@ -1013,15 +1015,22 @@ public:
 
 	uint c = 0;
 
-		Big<exp, man> temp(*this);
+		if( !SmallerWithoutSignThan(ss2) )
+		{
+			Big<exp, man> temp(*this);
 
-		c += temp.Div(ss2);
-		temp.SkipFraction();
-		c += temp.Mul(ss2);
-		c += Sub(temp);
+			c = temp.Div(ss2);
+			temp.SkipFraction();
+			c += temp.Mul(ss2);
+			c += Sub(temp);
+
+			if( !SmallerWithoutSignThan( ss2 ) )
+				c += 1;
+		}
 
 	return (c==0)? 0 : 1;
 	}
+
 
 
 
@@ -1876,7 +1885,7 @@ public:
 		// error but I leave it at the moment as is
 		TTMATH_ASSERT( sizeof(double) == 8 )
 
-		// I am not sure what will be on a plaltform which has 
+		// I am not sure what will be on a platform which has 
 		// a different endianness... but we use this library only
 		// on x86 and amd (intel) 64 bits (as there's a lot of assembler code)
 		union 
