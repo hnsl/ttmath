@@ -1,4 +1,18 @@
-Version 0.8.4 prerelease (2009.05.05):
+Version 0.8.5 (2009.05.11):
+    * fixed:   Big::Mod(x) didn't correctly return a carry
+               and the result was sometimes very big (even greater than x)
+    * fixed:   global function Mod(x) didn't set an ErrorCode object
+    * fixed:   global function Round() didn't test a carry
+               now it sets ErrorCode object
+    * changed: function Sin(x) to Sin(x, ErrorCode * err=0)
+               when x was very big the function returns zero
+               now it sets ErrorCode object to err_overflow
+               and the result is undefined
+               the same is to Cos() function
+    * changed: PrepareSin(x) is using Big::Mod() now when reducing 2PI period
+               should be a little accurate especially on a very big 'x'
+               
+Version 0.8.4 (2009.05.08):
     * fixed:   UInt::DivInt() didn't check whether the divisor is zero
                there was a hardware interruption when the divisor was zero
                (now the method returns one)
@@ -11,7 +25,7 @@ Version 0.8.4 prerelease (2009.05.05):
                (like "m" (mask) constraints in Rcl2 and Rcr2) have also gone away,
                now the library works well with -O2 and -O3 and the asm code
                is a little faster
-	* added:   UInt::PrintLog(const char * msg, std::ostream & output)
+    * added:   UInt::PrintLog(const char * msg, std::ostream & output)
                used (for debugging purposes) by macro TTMATH_LOG(msg)
                (it is used in nearly all methods in UInt class)
     * added:   macro TTMATH_DEBUG_LOG: when defined then TTMATH_LOG() 
@@ -25,7 +39,6 @@ Version 0.8.4 prerelease (2009.05.05):
                   (it's used when macro TTMATH_NOASM is defined)
                The third form can be used on x86 and x86_64 as well and
                on other platforms with a little effort.
-               (Temporarily I left there some '#ifdef's for debugging.)
                               
 
 Version 0.8.3 (2009.04.06):
