@@ -143,10 +143,7 @@ public:
 	*/
 	void SetZero()
 	{
-		// in the future here can be 'memset'
-
-		for(uint i=0 ; i<value_size ; ++i)
-			table[i] = 0;
+		memset(table,0,sizeof(table));
 
 		TTMATH_LOG("UInt::SetZero")
 	}
@@ -2072,8 +2069,7 @@ public:
 	*/
 	void FromUInt(uint value)
 	{
-		for(uint i=1 ; i<value_size ; ++i)
-			table[i] = 0;
+		memset(table,0,sizeof(table));
 
 		table[0] = value;
 

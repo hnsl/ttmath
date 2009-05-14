@@ -90,19 +90,11 @@ namespace ttmath
 
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-				push esi
-
+				xor eax,eax  // eax=0
 				mov ecx,[b]
-				
+				mov edx,eax  // edx=0
 				mov ebx,[p1]
 				mov esi,[p2]
-
-				xor eax,eax  // eax=0
-				mov edx,eax  // edx=0
 
 				sub eax,[c]  // CF=c
 
@@ -115,17 +107,8 @@ namespace ttmath
 			jnz p
 
 				setc al
-				movzx edx, al
-				mov [c], edx
-
-				pop esi
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
+				movzx eax, al
 			}
-
-
 
 		#endif		
 			
@@ -160,11 +143,10 @@ namespace ttmath
 				: "D" (c), "c" (b), "b" (p1), "S" (p2)
 				: "%eax", "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Add")
-
-	return c;
 	}
 
 
@@ -193,7 +175,6 @@ namespace ttmath
 	{
 	register uint b = value_size;
 	register uint * p1 = table;
-	register uint c;
 
 		TTMATH_ASSERT( index < value_size )
 
@@ -201,11 +182,6 @@ namespace ttmath
 
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-
 				mov ecx, [b]
 				sub ecx, [index]				
 
@@ -225,19 +201,15 @@ namespace ttmath
 
 			end:
 				setc al
-				movzx edx, al
-				mov [c], edx
-
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
+				movzx eax, al
 			}
 
 		#endif		
 			
 
 		#ifdef __GNUC__
+			register uint c;
+
 			__asm__ __volatile__(
 			
 				"push %%eax						\n"
@@ -265,11 +237,10 @@ namespace ttmath
 				: "a" (value), "c" (b), "0" (index), "b" (p1)
 				: "cc", "memory" );
 
+			return c;
 		#endif
 	
 		TTMATH_LOG("UInt32::AddInt")
-
-	return c;
 	}
 
 
@@ -310,18 +281,12 @@ namespace ttmath
 	{
 	register uint b = value_size;
 	register uint * p1 = table;
-	register uint c;
 
 		TTMATH_ASSERT( index < value_size - 1 )
 
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-
 				mov ecx, [b]
 				sub ecx, [index]				
 
@@ -346,19 +311,14 @@ namespace ttmath
 
 			end:
 				setc al
-				movzx edx, al
-				mov [c], edx
-				
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
-
+				movzx eax, al
 			}
 		#endif		
 			
 
 		#ifdef __GNUC__
+			register uint c;
+			
 			__asm__ __volatile__(
 			
 				"push %%ecx						\n"
@@ -390,11 +350,10 @@ namespace ttmath
 				: "c" (b), "d" (index), "b" (p1), "S" (x1), "0" (x2)
 				: "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::AddTwoInts")
-	
-	return c;
 	}
 
 
@@ -423,12 +382,6 @@ namespace ttmath
 
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-				push esi
-
 				mov ecx,[b]
 				
 				mov ebx,[p1]
@@ -448,14 +401,7 @@ namespace ttmath
 			jnz p
 
 				setc al
-				movzx edx, al
-				mov [c], edx
-
-				pop esi
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
+				movzx eax, al
 			}
 
 		#endif
@@ -487,11 +433,10 @@ namespace ttmath
 				: "D" (c), "c" (b), "b" (p1), "S" (p2)
 				: "%eax", "cc", "memory" );
 
+		return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Sub")
-
-	return c;
 	}
 
 
@@ -521,18 +466,12 @@ namespace ttmath
 	{
 	register uint b = value_size;
 	register uint * p1 = table;
-	register uint c;
 
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-
 				mov ecx, [b]
 				sub ecx, [index]				
 
@@ -552,18 +491,14 @@ namespace ttmath
 
 			end:
 				setc al
-				movzx edx, al
-				mov [c], edx
-
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
+				movzx eax, al
 			}
 		#endif		
 			
 
 		#ifdef __GNUC__
+			register uint c;
+
 			__asm__ __volatile__(
 			
 				"push %%eax						\n"
@@ -591,11 +526,11 @@ namespace ttmath
 				: "a" (value), "c" (b), "0" (index), "b" (p1)
 				: "cc", "memory" );
 
+			return c;
 		#endif
 		
 		TTMATH_LOG("UInt32::SubInt")
 	
-	return c;
 	}
 
 
@@ -621,10 +556,6 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				push ebx
-				push ecx
-				push edx
-
 				mov ebx, [p1]
 
 				xor edx, edx
@@ -641,13 +572,7 @@ namespace ttmath
 			jnz p
 
 				setc dl
-				movzx edx, dl
-				mov [c], edx
-
-				
-				pop edx
-				pop ecx
-				pop ebx
+				movzx eax, dl
 			}
 		#endif
 
@@ -678,11 +603,11 @@ namespace ttmath
 			: "0" (c), "c" (b), "b" (p1)
 			: "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Rcl2_one")
 
-	return c;
 	}
 
 
@@ -708,9 +633,6 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				push ebx
-				push ecx
-
 				mov ebx, [p1]
 
 				xor ecx, ecx
@@ -725,11 +647,7 @@ namespace ttmath
 			jnz p
 
 				setc cl
-				movzx ecx, cl
-				mov [c], ecx
-
-				pop ecx
-				pop ebx
+				movzx eax, cl
 			}
 		#endif
 
@@ -756,11 +674,10 @@ namespace ttmath
 			: "0" (c), "c" (b), "b" (p1)
 			: "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Rcr2_one")
-
-	return c;
 	}
 
 
@@ -789,13 +706,6 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-				push esi
-				push edi
-
 				mov edi, [b]
 
 				mov ecx, 32
@@ -828,14 +738,6 @@ namespace ttmath
 			jnz p
 
 				and eax, 1
-				mov [c], eax
-
-				pop edi
-				pop esi
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
 			}
 		#endif
 
@@ -884,11 +786,10 @@ namespace ttmath
 			: "0" (c), "D" (b), "b" (p1), "c" (bits), [amask] "m" (mask)
 			: "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Rcl2")
-
-	return c;
 	}
 
 
@@ -918,13 +819,6 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push ebx
-				push ecx
-				push edx
-				push esi
-				push edi
-
 				mov edi, [b]
 
 				mov ecx, 32
@@ -958,16 +852,8 @@ namespace ttmath
 				dec edi
 			jnz p
 
-				rol eax, 1    // 31bit will be first
+				rol eax, 1    // bit 31 will be bit 0
 				and eax, 1  
-				mov [c], eax
-
-				pop edi
-				pop esi
-				pop edx
-				pop ecx
-				pop ebx
-				pop eax
 			}
 		#endif
 
@@ -1019,11 +905,10 @@ namespace ttmath
 			: "0" (c), "D" (b), "b" (p1), "c" (bits), [amask] "m" (mask)
 			: "cc", "memory" );
 
+			return c;
 		#endif
 
 		TTMATH_LOG("UInt32::Rcr2")
-
-	return c;
 	}
 
 
@@ -1035,26 +920,20 @@ namespace ttmath
 	template<uint value_size>
 	sint UInt<value_size>::FindLeadingBitInWord(uint x)
 	{
-	register sint result;
 
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push edx
-
 				mov edx,-1
 				bsr eax,[x]
 				cmovz eax,edx
-				mov [result], eax
-
-				pop edx
-				pop eax
 			}
 		#endif
 
 
 		#ifdef __GNUC__
+			register sint result;
+			
 			__asm__  __volatile__(
 
 			"bsrl %1, %0		\n"
@@ -1066,9 +945,9 @@ namespace ttmath
 			: "R" (x)
 			: "cc" );
 
-		#endif
+			return result;
 
-	return result;
+		#endif
 	}
 
 
@@ -1090,15 +969,11 @@ namespace ttmath
 	{
 		TTMATH_ASSERT( bit < TTMATH_BITS_PER_UINT )
 
-		uint old_bit;
 		uint v = value;
 
 		#ifndef __GNUC__
 			__asm
 			{
-			push ebx
-			push eax
-
 			mov eax, [v]
 			mov ebx, [bit]
 			bts eax, ebx
@@ -1106,15 +981,14 @@ namespace ttmath
 
 			setc bl
 			movzx ebx, bl
-			mov [old_bit], ebx
-
-			pop eax
-			pop ebx
+			mov eax, ebx
 			}
 		#endif
 
 
 		#ifdef __GNUC__
+			uint old_bit;
+
 			__asm__  __volatile__(
 
 			"btsl %%ebx, %%eax		\n"
@@ -1126,11 +1000,10 @@ namespace ttmath
 			: "0" (v), "1" (bit)
 			: "cc" );
 
+			return old_bit;
 		#endif
 
 		value = v;
-
-	return old_bit;
 	}
 
 
@@ -1161,17 +1034,11 @@ namespace ttmath
 
 			__asm
 			{
-			push eax
-			push edx
-
 			mov eax, [a]
 			mul dword ptr [b]
 
 			mov [result2_], edx
 			mov [result1_], eax
-
-			pop edx
-			pop eax
 			}
 
 		#endif
@@ -1234,18 +1101,12 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				push eax
-				push edx
-
 				mov edx, [a]
 				mov eax, [b]
 				div dword ptr [c]
 
 				mov [r_], eax
 				mov [rest_], edx
-
-				pop edx
-				pop eax
 			}
 		#endif
 

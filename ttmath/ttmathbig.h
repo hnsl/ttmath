@@ -3449,7 +3449,7 @@ private:
 		const tchar_t * before_scientific = source;
 
 		if( FromString_TestScientific(source) )
-			c += FromString_ReadPartScientific( source, scientific_read );
+			c += (size_t)FromString_ReadPartScientific( source, scientific_read );
 
 		if( !scientific_read )
 			source = before_scientific;
