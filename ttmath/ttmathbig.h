@@ -3443,13 +3443,13 @@ private:
 	*/
 	int FromString_ReadScientificIfExists(const tchar_t * & source)
 	{
-	int c = 0;
+		uint c = 0;
 
 		bool scientific_read = false;
 		const tchar_t * before_scientific = source;
 
 		if( FromString_TestScientific(source) )
-			c += (size_t)FromString_ReadPartScientific( source, scientific_read );
+			c += FromString_ReadPartScientific( source, scientific_read );
 
 		if( !scientific_read )
 			source = before_scientific;

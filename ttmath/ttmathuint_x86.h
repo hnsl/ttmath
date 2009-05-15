@@ -104,7 +104,7 @@ namespace ttmath
 
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 				setc al
 				movzx eax, al
@@ -192,12 +192,12 @@ namespace ttmath
 
 			p:
 				add [ebx+edx*4], eax
-			jnc end
+				jnc end
 
 				mov eax, 1
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 			end:
 				setc al
@@ -302,12 +302,12 @@ namespace ttmath
 			
 			p:
 				adc [ebx+edx*4], eax
-			jnc end
+				jnc end
 
 				mov eax, 0
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 			end:
 				setc al
@@ -398,7 +398,7 @@ namespace ttmath
 
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 				setc al
 				movzx eax, al
@@ -482,12 +482,12 @@ namespace ttmath
 
 			p:
 				sub [ebx+edx*4], eax
-			jnc end
+				jnc end
 
 				mov eax, 1
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 			end:
 				setc al
@@ -569,7 +569,7 @@ namespace ttmath
 				
 				inc edx
 				dec ecx
-			jnz p
+				jnz p
 
 				setc dl
 				movzx eax, dl
@@ -644,7 +644,7 @@ namespace ttmath
 				rcr dword ptr [ebx+ecx*4-4], 1
 				
 				dec ecx
-			jnz p
+				jnz p
 
 				setc cl
 				movzx eax, cl
@@ -724,7 +724,7 @@ namespace ttmath
 				or eax, eax
 				cmovnz esi, [mask] // if c then old value = mask
 
-		p:
+			p:
 				rol dword ptr [ebx+edx*4], cl
 				
 				mov eax, [ebx+edx*4]
@@ -735,7 +735,7 @@ namespace ttmath
 
 				inc edx
 				dec edi
-			jnz p
+				jnz p
 
 				and eax, 1
 			}
@@ -850,7 +850,7 @@ namespace ttmath
 
 				dec edx
 				dec edi
-			jnz p
+				jnz p
 
 				rol eax, 1    // bit 31 will be bit 0
 				and eax, 1  
@@ -974,14 +974,14 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-			mov eax, [v]
-			mov ebx, [bit]
-			bts eax, ebx
-			mov [v], eax
+				mov eax, [v]
+				mov ebx, [bit]
+				bts eax, ebx
+				mov [v], eax
 
-			setc bl
-			movzx ebx, bl
-			mov eax, ebx
+				setc bl
+				movzx ebx, bl
+				mov eax, ebx
 			}
 		#endif
 
@@ -1034,11 +1034,11 @@ namespace ttmath
 
 			__asm
 			{
-			mov eax, [a]
-			mul dword ptr [b]
+				mov eax, [a]
+				mul dword ptr [b]
 
-			mov [result2_], edx
-			mov [result1_], eax
+				mov [result2_], edx
+				mov [result1_], eax
 			}
 
 		#endif

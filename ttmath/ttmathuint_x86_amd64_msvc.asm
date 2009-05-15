@@ -42,11 +42,14 @@ adc_x64				PROC
 		
 		jnz		loop1
 		
-		setc	al
-		movzx	rax, al
+		jc		return_1	; most of the times, there will be NO carry (I hope)
+		xor		rax, rax
+		ret
+	
+  return_1:
+		mov		rax, 1
+		ret
 		
-        ret
-
 adc_x64				ENDP
 
 ;----------------------------------------
@@ -73,10 +76,13 @@ loop1:
 		jnz		loop1
 		
 done:
-		setc	al
-		movzx	rax, al
-		
-        ret
+		jc		return_1	; most of the times, there will be NO carry (I hope)
+		xor		rax, rax
+		ret
+	
+  return_1:
+		mov		rax, 1
+		ret
 
 addindexed_x64	ENDP
 
@@ -110,10 +116,13 @@ loop1:
 		jnz		loop1
 		
 done:
-		setc	al
-		movzx	rax, al
-		
-        ret
+		jc		return_1	; most of the times, there will be NO carry (I hope)
+		xor		rax, rax
+		ret
+	
+  return_1:
+		mov		rax, 1
+		ret
 
 addindexed2_x64	ENDP
 
@@ -144,10 +153,13 @@ sbb_x64				PROC
 		
 		jnz		loop1
 		
-		setc	al
-		movzx	rax, al
-		
-        ret
+		jc		return_1	; most of the times, there will be NO carry (I hope)
+		xor		rax, rax
+		ret
+	
+  return_1:
+		mov		rax, 1
+		ret
 
 sbb_x64				ENDP
 
@@ -174,10 +186,13 @@ loop1:
 		jnz		loop1
 		
 done:
-		setc	al
-		movzx	rax, al
-		
-        ret
+		jc		return_1	; most of the times, there will be NO carry (I hope)
+		xor		rax, rax
+		ret
+	
+  return_1:
+		mov		rax, 1
+		ret
 
 subindexed_x64	ENDP
 
@@ -270,6 +285,8 @@ rcl2_x64	PROC
         ; r8 = bits
         ; r9 = c
         
+        push	rbx
+        
         mov		r10, rcx	; r10 = p1
         xor		rax, rax	
         
@@ -301,6 +318,7 @@ loop1:
 		jnz		loop1
 
 		and		rax, 1
+		pop		rbx
         ret
 				
 rcl2_x64	ENDP				
@@ -317,6 +335,7 @@ rcr2_x64	PROC
         ; r8 = bits
         ; r9 = c
         
+        push	rbx
         mov		r10, rcx	; r10 = p1
         xor		rax, rax	
         
@@ -350,6 +369,7 @@ loop1:
 		
 		rol		rax, 1
 		and		rax, 1
+		pop		rbx
 		
         ret
 				
