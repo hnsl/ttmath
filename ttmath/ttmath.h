@@ -96,13 +96,10 @@ namespace ttmath
 			 -2.7 = -3
 	*/
 	template<class ValueType>
-	ValueType Round(const ValueType & x, ErrorCode * err = 0)
+	ValueType Round(const ValueType & x)
 	{
 		ValueType result( x );
-		uint c = result.Round();
-
-		if( err )
-			*err = c ? err_overflow : err_ok;
+		result.Round();
 
 	return result;
 	}
@@ -300,7 +297,7 @@ namespace ttmath
 		(you don't have to call this function) 
 	*/
 	template<class ValueType>
-	uint PrepareSin(ValueType & x, bool & change_sign)
+	void PrepareSin(ValueType & x, bool & change_sign)
 	{
 	ValueType temp;
 
@@ -316,11 +313,13 @@ namespace ttmath
 		// we're reducing the period 2*PI
 		// (for big values there'll always be zero)
 		temp.Set2Pi();
-		
-		if( x.Mod(temp) )
-			return 1;
-		
-
+		if( x > temp )
+		{
+			x.Div( temp );
+			x.RemainFraction();
+			x.Mul( temp );
+		}
+	
 		// we're setting 'x' as being in the range of <0, 0.5PI>
 
 		temp.SetPi();
@@ -340,8 +339,6 @@ namespace ttmath
 			x.Sub( temp );
 			x = temp - x;
 		}
-
-	return 0;
 	}
 
 	
@@ -428,7 +425,7 @@ namespace ttmath
 			if( c )
 				// Sin is from <-1,1> and cannot make an overflow
 				// but the carry can be from the Taylor series
-				// (then we only break our calculations)
+				// (then we only breaks our calculations)
 				break;
 
 			if( addition )
@@ -460,28 +457,15 @@ namespace ttmath
 		this function calculates the Sine
 	*/
 	template<class ValueType>
-	ValueType Sin(ValueType x, ErrorCode * err = 0)
+	ValueType Sin(ValueType x)
 	{
 	using namespace auxiliaryfunctions;
 
-	ValueType one, result;
+	ValueType one;
 	bool change_sign;	
 	
-		if( err )
-			*err = err_ok;
-
-		if( PrepareSin( x, change_sign ) )
-		{
-			// x is too big, we cannnot reduce the 2*PI period
-			// prior to version 0.8.5 the result was zero
-
-			if( err )
-				*err = err_overflow; // maybe another error code?
-
-		return result; // result we remain as undefined
-		}
-
-		result = Sin0pi05( x );
+		PrepareSin( x, change_sign );
+		ValueType result = Sin0pi05( x );
 	
 		one.SetOne();
 
@@ -506,22 +490,14 @@ namespace ttmath
 		we're using the formula cos(x) = sin(x + PI/2)
 	*/
 	template<class ValueType>
-	ValueType Cos(ValueType x, ErrorCode * err = 0)
+	ValueType Cos(ValueType x)
 	{
 		ValueType pi05;
 		pi05.Set05Pi();
 
-		uint c = x.Add( pi05 );
-
-		if( c )
-		{
-			if( err )
-				*err = err_overflow;
+		x.Add( pi05 );
 	
-		return ValueType(); // result is undefined
-		}
-
-	return Sin(x, err);
+	return Sin(x);
 	}
 	
 
@@ -538,10 +514,7 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Tan(const ValueType & x, ErrorCode * err = 0)
 	{
-		ValueType result = Cos(x, err);
-		
-		if( err && *err != err_ok )
-			return result;
+		ValueType result = Cos(x);
 
 		if( result.IsZero() )
 		{
@@ -551,7 +524,10 @@ namespace ttmath
 		return result;
 		}
 
-	return Sin(x, err) / result;
+		if( err )
+			*err = err_ok;
+
+	return Sin(x) / result;
 	}
 
 
@@ -578,10 +554,7 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Cot(const ValueType & x, ErrorCode * err = 0)
 	{
-		ValueType result = Sin(x, err);
-
-		if( err && *err != err_ok )
-			return result;
+		ValueType result = Sin(x);
 
 		if( result.IsZero() )
 		{
@@ -591,7 +564,10 @@ namespace ttmath
 		return result;
 		}
 	
-	return Cos(x, err) / result;
+		if( err )
+			*err = err_ok;
+
+	return Cos(x) / result;
 	}
 
 
@@ -2035,18 +2011,15 @@ namespace ttmath
 		the remainder from a division
 
 		e.g.
-		mod( 12.6 ;  3) =  0.6   because 12.6  = 3*4 + 0.6
-		mod(-12.6 ;  3) = -0.6   bacause -12.6 = 3*(-4) + (-0.6)
+		mod( 12.6 ;  3) =  0.6   because 12.6 = 3*4 + 0.6
+		mod(-12.6 ;  3) = -0.6
 		mod( 12.6 ; -3) =  0.6
 		mod(-12.6 ; -3) = -0.6
 	*/
 	template<class ValueType>
-	ValueType Mod(ValueType a, const ValueType & b, ErrorCode * err = 0)
+	ValueType Mod(ValueType a, const ValueType & b)
 	{
-		uint c = a.Mod(b);
-
-		if( err )
-			*err = c ? err_overflow : err_ok;
+		a.Mod(b);
 
 	return a;
 	}

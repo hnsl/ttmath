@@ -708,11 +708,7 @@ void Sin(int sindex, int amount_of_args, ValueType & result)
 	if( amount_of_args != 1 )
 		Error( err_improper_amount_of_arguments );
 
-	ErrorCode err;
-	result = ttmath::Sin( ConvertAngleToRad(stack[sindex].value), &err );
-
-	if(err != err_ok)
-		Error( err );
+	result = ttmath::Sin( ConvertAngleToRad(stack[sindex].value) );
 }
 
 void Cos(int sindex, int amount_of_args, ValueType & result)
@@ -720,11 +716,7 @@ void Cos(int sindex, int amount_of_args, ValueType & result)
 	if( amount_of_args != 1 )
 		Error( err_improper_amount_of_arguments );
 
-	ErrorCode err;
-	result = ttmath::Cos( ConvertAngleToRad(stack[sindex].value), &err );
-
-	if(err != err_ok)
-		Error( err );
+	result = ttmath::Cos( ConvertAngleToRad(stack[sindex].value) );
 }
 
 void Tan(int sindex, int amount_of_args, ValueType & result)
@@ -765,10 +757,7 @@ void Round(int sindex, int amount_of_args, ValueType & result)
 	if( amount_of_args != 1 )
 		Error( err_improper_amount_of_arguments );
 
-	result = stack[sindex].value;
-
-	if( result.Round() )
-		Error( err_overflow );
+	result = ttmath::Round(stack[sindex].value);
 }
 
 

@@ -114,9 +114,9 @@ loop1:
 		mov		r9, 0				; set to 0 -> cy still set!
 		dec		rdx
 		jnz		loop1
-		
+		jc		return_1			; most of the times, there will be NO carry (I hope)
+
 done:
-		jc		return_1	; most of the times, there will be NO carry (I hope)
 		xor		rax, rax
 		ret
 	
@@ -184,9 +184,9 @@ loop1:
 		mov		r9, 1
 		dec		rdx
 		jnz		loop1
-		
-done:
 		jc		return_1	; most of the times, there will be NO carry (I hope)
+
+done:
 		xor		rax, rax
 		ret
 	

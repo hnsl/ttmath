@@ -158,7 +158,7 @@ namespace ttmath
 			table[1] = 30 + 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[2] it would be returned
+		of course if there was a carry from table[3] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::AddInt(uint value, uint index)
@@ -374,7 +374,7 @@ namespace ttmath
 			table[1] = 30 - 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[2] it would be returned
+		of course if there was a carry from table[3] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::SubInt(uint value, uint index)
@@ -695,7 +695,7 @@ namespace ttmath
 
 
 	/*
-		this method returns the number of the highest set bit in one 64-bit word
+		this method returns the number of the highest set bit in one 32-bit word
 		if the 'x' is zero this method returns '-1'
 
 		***this method is created only on a 64bit platform***
@@ -800,17 +800,18 @@ namespace ttmath
 
 
 	/*!
-		multiplication: result_high:result_low = a * b
-		result_high - higher word of the result
-		result_low  - lower word of the result
+		multiplication: result2:result1 = a * b
+		result2 - higher word
+		result1 - lower word of the result
 	
 		this methos never returns a carry
-		this method is used in the second version of the multiplication algorithms
 
 		***this method is created only on a 64bit platform***
+
+		it is an auxiliary method for version two of the multiplication algorithm
 	*/
 	template<uint value_size>
-	void UInt<value_size>::MulTwoWords(uint a, uint b, uint * result_high, uint * result_low)
+	void UInt<value_size>::MulTwoWords(uint a, uint b, uint * result2, uint * result1)
 	{
 	/*
 		we must use these temporary variables in order to inform the compilator
@@ -843,8 +844,8 @@ namespace ttmath
 		#endif
 
 
-		*result_low  = result1_;
-		*result_high = result2_;
+		*result1 = result1_;
+		*result2 = result2_;
 	}
 
 
