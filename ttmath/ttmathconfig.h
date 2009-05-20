@@ -37,6 +37,7 @@ namespace ttmath
 {
 
 #if defined(_MSC_VER)
+	#include <windows.h>
 	#if defined(_UNICODE)
 		typedef	wchar_t					tchar_t;
 		typedef	std::wstring			tstr_t;
@@ -71,20 +72,20 @@ namespace ttmath
 			public:
 												clsCrit(void)
 													{
-													::InitializeCriticalSection(&_Crit);
+													InitializeCriticalSection(&_Crit);
 													}
 				virtual							~clsCrit(void)
 													{
-													::DeleteCriticalSection(&_Crit);
+													DeleteCriticalSection(&_Crit);
 													}
 
 				void							Enter(void) const
 													{
-													::EnterCriticalSection(&_Crit);
+													EnterCriticalSection(&_Crit);
 													}
 				void							Leave(void) const
 													{
-													::LeaveCriticalSection(&_Crit);
+													LeaveCriticalSection(&_Crit);
 													}
 			};
 

@@ -31,23 +31,21 @@ adc_x64				PROC
         ; r9 = nCarry
 
         xor		rax, rax
-        mov		r11, 0
+        xor		r11, r11
         sub		rax, r9		; sets CARRY if r9 != 0
         
+		ALIGN 16
  loop1:	
 		mov		rax,qword ptr [rdx + r11 * 8]
 		adc		qword ptr [rcx + r11 * 8], rax
-		inc		r11
+		lea		r11, [r11+1]
 		dec		r8
 		
 		jnz		loop1
 		
-		jc		return_1	; most of the times, there will be NO carry (I hope)
-		xor		rax, rax
-		ret
-	
-  return_1:
-		mov		rax, 1
+		setc	al
+		movzx	rax, al
+
 		ret
 		
 adc_x64				ENDP
@@ -66,24 +64,22 @@ addindexed_x64	PROC
         ; r9 = nValue
 
 		sub		rdx, r8				; rdx = remaining count of uints
+		ALIGN 16
 loop1:
 		add		qword ptr [rcx + r8 * 8], r9
 		jnc		done
 		
-		inc		r8
+		lea		r8, [r8+1]
 		mov		r9, 1
 		dec		rdx
 		jnz		loop1
 		
 done:
-		jc		return_1	; most of the times, there will be NO carry (I hope)
-		xor		rax, rax
+		setc	al
+		movzx	rax, al
+		
 		ret
 	
-  return_1:
-		mov		rax, 1
-		ret
-
 addindexed_x64	ENDP
 
 ;----------------------------------------
@@ -100,28 +96,32 @@ addindexed2_x64	PROC
         ; r9 = nValue1
         ; [esp+0x28] = nValue2
 
+		xor		rax, rax			; return value
 		mov		r11, rcx			; table
 		sub		rdx, r8				; rdx = remaining count of uints
 		mov		r10, [esp+028h]		; r10 = nValue2
 
 		add		qword ptr [r11 + r8 * 8], r10
-		inc		r8
+		lea		r8, [r8+1]
+
+		ALIGN 16
 loop1:
 		adc		qword ptr [r11 + r8 * 8], r9
-		jnc		done
+		jc		next
+		ret
 		
-		inc		r8
-		mov		r9, 0				; set to 0 -> cy still set!
+next:
+		lea		r8, [r8+1]
+		xor		r9, r9				; set to 0 -> cy still set!
 		dec		rdx
 		jnz		loop1
 		jc		return_1			; most of the times, there will be NO carry (I hope)
 
 done:
-		xor		rax, rax
 		ret
 	
-  return_1:
-		mov		rax, 1
+return_1:
+		lea		rax, [rax+1]
 		ret
 
 addindexed2_x64	ENDP
@@ -142,23 +142,20 @@ sbb_x64				PROC
         ; r9 = nCarry
 
         xor		rax, rax
-        mov		r11, 0
+        xor		r11, r11
         sub		rax, r9				; sets CARRY if r9 != 0
         
+		ALIGN 16
  loop1:	
 		mov		rax,qword ptr [rdx + r11 * 8]
 		sbb		qword ptr [rcx + r11 * 8], rax
-		inc		r11
+		lea		r11, [r11+1]
 		dec		r8
-		
 		jnz		loop1
 		
-		jc		return_1	; most of the times, there will be NO carry (I hope)
-		xor		rax, rax
-		ret
-	
-  return_1:
-		mov		rax, 1
+		setc	al
+		movzx	rax, al
+
 		ret
 
 sbb_x64				ENDP
@@ -176,11 +173,13 @@ subindexed_x64	PROC
         ; r9 = nValue
 
 		sub		rdx, r8				; rdx = remaining count of uints
+		
+		ALIGN 16
 loop1:
 		sub		qword ptr [rcx + r8 * 8], r9
 		jnc		done
 		
-		inc		r8
+		lea		r8, [r8+1]
 		mov		r9, 1
 		dec		rdx
 		jnz		loop1
@@ -210,9 +209,11 @@ rcl_x64	PROC
 		mov		r11, rcx			; table
 		xor		r10, r10
 		neg		r8					; CY set if r8 <> 0
+		
+		ALIGN 16
 loop1:
 		rcl		qword ptr [r11 + r10 * 8], 1
-		inc		r10
+		lea		r10, [r10+1]
 		dec		rdx
 		jnz		loop1
 		
@@ -236,6 +237,8 @@ rcr_x64	PROC
 
 		xor		r10, r10
 		neg		r8					; CY set if r8 <> 0
+		
+		ALIGN 16
 loop1:
 		rcr		qword ptr -8[rcx + rdx * 8], 1
 		dec		rdx
@@ -304,6 +307,7 @@ rcl2_x64	PROC
 
         mov		r9, rax		; r9 = index (0..nSize-1)
 
+		ALIGN 16
 loop1:
 		rol		qword ptr [r10+r9*8], cl
 		mov		rax, qword ptr [r10+r9*8]
@@ -312,7 +316,7 @@ loop1:
 		or		qword ptr [r10+r9*8], rbx
 		mov		rbx, rax
 		
-		inc		r9
+		lea		r9, [r9+1]
 		dec		rdx
 
 		jnz		loop1
@@ -352,8 +356,9 @@ rcr2_x64	PROC
 		cmovnz	rbx, r11	; if (c) then old value = mask
 
         mov		r9, rdx		; r9 = index (0..nSize-1)
-        dec		r9
+		lea		r9, [r9-1]
 
+		ALIGN 16
 loop1:
 		ror		qword ptr [r10+r9*8], cl
 		mov		rax, qword ptr [r10+r9*8]
@@ -362,7 +367,7 @@ loop1:
 		or		qword ptr [r10+r9*8], rbx
 		mov		rbx, rax
 		
-		dec		r9
+		lea		r9, [r9-1]
 		dec		rdx
 
 		jnz		loop1

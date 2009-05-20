@@ -3434,7 +3434,7 @@ private:
 	*/
 	int FromString_ReadScientificIfExists(const tchar_t * & source)
 	{
-	int c = 0;
+	uint c = 0;
 
 		bool scientific_read = false;
 		const tchar_t * before_scientific = source;

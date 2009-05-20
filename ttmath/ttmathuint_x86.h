@@ -98,16 +98,17 @@ namespace ttmath
 
 				sub eax,[c]  // CF=c
 
-			p:
-				mov eax,[esi+edx*4]
-				adc [ebx+edx*4],eax
+				ALIGN 16
+			p:				
+				mov eax,[esi+edx*4+0]
+				adc [ebx+edx*4+0],eax
 
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
-				setc al
-				movzx eax, al
+				setc	al
+				movzx	eax, al
 			}
 
 		#endif		
@@ -190,18 +191,19 @@ namespace ttmath
 
 				mov eax, [value]
 
+				ALIGN 16
 			p:
 				add [ebx+edx*4], eax
 				jnc end
 
 				mov eax, 1
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
 			end:
-				setc al
-				movzx eax, al
+				setc	al
+				movzx	eax, al
 			}
 
 		#endif		
@@ -295,23 +297,24 @@ namespace ttmath
 
 				mov eax, [x1]
 				add [ebx+edx*4], eax
-				inc edx
-				dec ecx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
+				lea ecx, [ecx-1]
 
 				mov eax, [x2]
 			
+				ALIGN 16
 			p:
 				adc [ebx+edx*4], eax
 				jnc end
 
-				mov eax, 0
-				inc edx
+				xor eax, eax
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
 			end:
-				setc al
-				movzx eax, al
+				setc	al
+				movzx	eax, al
 			}
 		#endif		
 			
@@ -392,16 +395,17 @@ namespace ttmath
 
 				sub eax, [c]
 
+				ALIGN 16
 			p:
 				mov eax, [esi+edx*4]
 				sbb [ebx+edx*4], eax
 
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
-				setc al
-				movzx eax, al
+				setc	al
+				movzx	eax, al
 			}
 
 		#endif
@@ -480,18 +484,19 @@ namespace ttmath
 
 				mov eax, [value]
 
+				ALIGN 16
 			p:
 				sub [ebx+edx*4], eax
 				jnc end
 
 				mov eax, 1
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
 			end:
-				setc al
-				movzx eax, al
+				setc	al
+				movzx	eax, al
 			}
 		#endif		
 			
@@ -564,15 +569,16 @@ namespace ttmath
 
 				mov ecx, [b]
 
+				ALIGN 16
 			p:
 				rcl dword ptr [ebx+edx*4], 1
 				
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
 
-				setc dl
-				movzx eax, dl
+				setc	al
+				movzx	eax, al
 			}
 		#endif
 
@@ -633,21 +639,21 @@ namespace ttmath
 		#ifndef __GNUC__
 			__asm
 			{
-				mov ebx, [p1]
-
 				xor ecx, ecx
 				sub ecx, [c]
 
+				mov ebx, [p1]
 				mov ecx, [b]
 
+				ALIGN 16
 			p:
 				rcr dword ptr [ebx+ecx*4-4], 1
 				
 				dec ecx
 				jnz p
 
-				setc cl
-				movzx eax, cl
+				setc	al
+				movzx	eax, al
 			}
 		#endif
 
@@ -724,6 +730,7 @@ namespace ttmath
 				or eax, eax
 				cmovnz esi, [mask] // if c then old value = mask
 
+				ALIGN 16
 			p:
 				rol dword ptr [ebx+edx*4], cl
 				
@@ -733,7 +740,7 @@ namespace ttmath
 				or [ebx+edx*4], esi  // saving old value
 				mov esi, eax
 
-				inc edx
+				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec edi
 				jnz p
 
@@ -839,6 +846,7 @@ namespace ttmath
 				or eax, eax
 				cmovnz esi, [mask] // if c then old value = mask
 
+				ALIGN 16
 			p:
 				ror dword ptr [ebx+edx*4], cl
 				
