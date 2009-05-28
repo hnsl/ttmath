@@ -1,3 +1,4 @@
+
 /*
  * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
@@ -467,6 +468,21 @@ namespace ttmath
 		PrepareSin( x, change_sign );
 		ValueType result = Sin0pi05( x );
 	
+		if( PrepareSin( x, change_sign ) )
+		{
+			// x is too big, we cannnot reduce the 2*PI period
+			// prior to version 0.8.5 the result was zero
+			
+			// result has NaN flag set by default
+
+			if( err )
+				*err = err_overflow; // maybe another error code?
+
+		return result; // NaN is set by default
+		}
+
+		result = Sin0pi05( x );
+	
 		one.SetOne();
 
 		// after calculations there can be small distortions in the result
@@ -497,7 +513,13 @@ namespace ttmath
 
 		x.Add( pi05 );
 	
-	return Sin(x);
+		if( c )
+		{
+			if( err )
+				*err = err_overflow;
+		}
+	
+		return ValueType(); // result is undefined (NaN is set by default)
 	}
 	
 
@@ -520,6 +542,8 @@ namespace ttmath
 		{
 			if( err )
 				*err = err_improper_argument;
+
+			result.SetNan();
 
 		return result;
 		}
@@ -560,6 +584,8 @@ namespace ttmath
 		{
 			if( err )
 				*err = err_improper_argument;
+
+			result.SetNan();
 
 		return result;
 		}
@@ -748,7 +774,7 @@ namespace ttmath
 	{
 	using namespace auxiliaryfunctions;
 
-		ValueType one;
+		ValueType result, one;
 		one.SetOne();
 		bool change_sign = false;
 
@@ -757,7 +783,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-			return one;
+			return result; // NaN is set by default
 		}
 
 		if( x.IsSign() )
@@ -767,8 +793,6 @@ namespace ttmath
 		}
 
 		one.exponent.SubOne(); // =0.5
-
-		ValueType result;
 
 		// asin(-x) = -asin(x)
 		if( x.GreaterWithoutSignThan(one) )
@@ -1149,7 +1173,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-			return x;
+			return ValueType(); // NaN is set by default
 		}
 
 		ValueType ex, emx, nominator, denominator;
@@ -1238,7 +1262,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-		return result;
+		return result; // NaN is set by default
 		}
 
 		c += xx.Mul(x);
@@ -1279,7 +1303,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-		return result;
+		return result; // NaN is set by default
 		}
 
 		c += nominator.Add(one);
@@ -1324,7 +1348,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-		return result;
+		return result; // NaN is set by default
 		}
 
 		c += nominator.Add(one);
@@ -1443,7 +1467,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-			return delimiter;
+			return delimiter; // NaN is set by default
 		}
 
 		multipler = 60;
@@ -1624,7 +1648,7 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
-		return x;
+		return ValueType(); // NaN is set by default
 		}
 
 		if( x.IsZero() )
@@ -1662,6 +1686,8 @@ namespace ttmath
 				if( err )
 					*err = err_improper_argument;
 
+				x.SetNan();
+
 			return true;
 			}
 
@@ -1679,6 +1705,8 @@ namespace ttmath
 					// there isn't root(0;0) - we assume it's not defined
 					if( err )
 						*err = err_improper_argument;
+
+					x.SetNan();
 
 				return true;
 				}
@@ -1729,6 +1757,8 @@ namespace ttmath
 				if( err )
 					*err = err_improper_argument;
 
+				x.SetNan();
+
 			return true;
 			}
 
@@ -1776,6 +1806,8 @@ namespace ttmath
 				{
 					if( err )
 						*err = err_improper_argument;
+
+					x.SetNan();
 
 					return true;
 				}
@@ -1861,6 +1893,7 @@ namespace ttmath
 
 		while( !carry && multipler<maxvalue  )
 		{
+			// !! the test here we don't have to make in all iterations (performance)
 			if( stop && stop->WasStopSignal() )
 			{
 				if( err )
@@ -1893,6 +1926,7 @@ namespace ttmath
 
 		while( !carry && multipler < x )
 		{
+			// !! the test here we don't have to make in all iterations (performance)
 			if( stop && stop->WasStopSignal() )
 			{
 				if( err )
@@ -1936,6 +1970,8 @@ namespace ttmath
 			if( err )
 				*err = err_improper_argument;
 
+			result.SetNan();
+
 		return result;
 		}
 
@@ -1946,6 +1982,8 @@ namespace ttmath
 			// we don't have enough bits in the mantissa)
 			if( err )
 				*err = err_overflow;
+
+			result.SetNan();
 
 		return result;
 		}
@@ -1967,8 +2005,11 @@ namespace ttmath
 			status = FactorialMore(x, err, stop, result);
 
 		if( status == 2 )
+		{
 			// the calculation has been interrupted
+			result.SetNan();
 			return result;
+		}
 
 		err_tmp = status==1 ? err_overflow : err_ok;
 		history.Add(x, result, err_tmp);

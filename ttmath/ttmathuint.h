@@ -971,8 +971,9 @@ public:
 		Mul2Big(ss2, result);
 	
 		// copying result
-		for(i=0 ; i<value_size ; ++i)
-			table[i] = result.table[i];
+		memcpy(table,result.table,sizeof(table));
+		//for(i=0 ; i<value_size ; ++i)
+		//	table[i] = result.table[i];
 
 		// testing carry
 		for( ; i<value_size*2 ; ++i)

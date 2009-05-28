@@ -91,8 +91,8 @@ namespace ttmath
 			__asm
 			{
 				xor eax,eax  // eax=0
+				xor edx,edx  // edx=0
 				mov ecx,[b]
-				mov edx,eax  // edx=0
 				mov ebx,[p1]
 				mov esi,[p2]
 
@@ -290,24 +290,22 @@ namespace ttmath
 			__asm
 			{
 				mov ecx, [b]
-				sub ecx, [index]				
-
-				mov ebx, [p1]
 				mov edx, [index]
-
+				mov ebx, [p1]
 				mov eax, [x1]
+				sub ecx, edx	// max uints to add (value_size - index)
+
 				add [ebx+edx*4], eax
-				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				lea ecx, [ecx-1]
 
 				mov eax, [x2]
 			
 				ALIGN 16
 			p:
-				adc [ebx+edx*4], eax
+				adc [ebx+edx*4+4], eax
 				jnc end
 
-				xor eax, eax
+				mov eax, 0
 				lea edx, [edx+1] // inc edx, but faster (no flags dependencies)
 				dec ecx
 				jnz p
