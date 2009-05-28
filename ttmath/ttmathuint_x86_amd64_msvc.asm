@@ -40,7 +40,6 @@ adc_x64				PROC
 		adc		qword ptr [rcx + r11 * 8], rax
 		lea		r11, [r11+1]
 		dec		r8
-		
 		jnz		loop1
 		
 		setc	al
@@ -63,20 +62,29 @@ addindexed_x64	PROC
         ; r8 = nPos
         ; r9 = nValue
 
+		xor		rax, rax			; rax = result
 		sub		rdx, r8				; rdx = remaining count of uints
+
+		add		qword ptr [rcx + r8 * 8], r9
+		jc		next1
+
+		ret
+
+next1:
+		mov		r9, 1
+
 		ALIGN 16
 loop1:
-		add		qword ptr [rcx + r8 * 8], r9
-		jnc		done
-		
-		lea		r8, [r8+1]
-		mov		r9, 1
 		dec		rdx
-		jnz		loop1
+		jz		done_with_cy
+		lea		r8, [r8+1]
+		add		qword ptr [rcx + r8 * 8], r9
+		jc		loop1
 		
-done:
-		setc	al
-		movzx	rax, al
+		ret
+		
+done_with_cy:
+		lea		rax, [rax+1]		; rax = 1
 		
 		ret
 	
