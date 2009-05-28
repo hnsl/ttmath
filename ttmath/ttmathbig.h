@@ -2693,7 +2693,7 @@ public:
 					tchar_t decimal_point = TTMATH_COMMA_CHARACTER_1 ) const
 	{										  
 		static tchar_t error_overflow_msg[] = TTMATH_TEXT("overflow");
-		static char error_nan_msg[]      = "NaN";
+		static tchar_t error_nan_msg[]      = TTMATH_TEXT("NaN");
 		result.erase();
 		
 		if( IsNan() )

@@ -36,14 +36,13 @@
  */
 
 
-
 #ifndef headerfilettmathuint_x86
 #define headerfilettmathuint_x86
-
 
 #ifndef TTMATH_NOASM
 #ifdef TTMATH_PLATFORM32
 
+#pragma message("TTMATH_ASM")
 
 /*!
 	\file ttmathuint_x86.h
@@ -65,8 +64,7 @@ namespace ttmath
 	*	basic mathematic functions
 	*
 	*/
-
-
+	
 	/*!
 		adding ss2 to the this and adding carry if it's defined
 		(this = this + ss2 + c)
@@ -85,7 +83,6 @@ namespace ttmath
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-			
 			//	this part might be compiled with for example visual c
 
 			__asm
@@ -109,8 +106,8 @@ namespace ttmath
 
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
-
 		#endif		
 			
 
@@ -143,11 +140,11 @@ namespace ttmath
 				: "=d" (c)
 				: "D" (c), "c" (b), "b" (p1), "S" (p2)
 				: "%eax", "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Add")
+		TTMATH_LOG("UInt::Add")
+		
+		return c;
 	}
 
 
@@ -174,13 +171,13 @@ namespace ttmath
 	template<uint value_size>
 	uint UInt<value_size>::AddInt(uint value, uint index)
 	{
-	register uint b = value_size;
-	register uint * p1 = table;
+	uint b = value_size;
+	uint * p1 = table;
+	uint c;
 
 		TTMATH_ASSERT( index < value_size )
 
 		#ifndef __GNUC__
-
 			__asm
 			{
 				mov ecx, [b]
@@ -204,14 +201,12 @@ namespace ttmath
 			end:
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
-
 		#endif		
 			
 
 		#ifdef __GNUC__
-			register uint c;
-
 			__asm__ __volatile__(
 			
 				"push %%eax						\n"
@@ -238,11 +233,11 @@ namespace ttmath
 				: "=d" (c)
 				: "a" (value), "c" (b), "0" (index), "b" (p1)
 				: "cc", "memory" );
-
-			return c;
 		#endif
 	
-		TTMATH_LOG("UInt32::AddInt")
+		TTMATH_LOG("UInt::AddInt")
+		
+		return c;
 	}
 
 
@@ -281,8 +276,9 @@ namespace ttmath
 	template<uint value_size>
 	uint UInt<value_size>::AddTwoInts(uint x2, uint x1, uint index)
 	{
-	register uint b = value_size;
-	register uint * p1 = table;
+	uint b = value_size;
+	uint * p1 = table;
+	uint	c;
 
 		TTMATH_ASSERT( index < value_size - 1 )
 
@@ -313,13 +309,11 @@ namespace ttmath
 			end:
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
 		#endif		
-			
 
 		#ifdef __GNUC__
-			register uint c;
-			
 			__asm__ __volatile__(
 			
 				"push %%ecx						\n"
@@ -350,11 +344,11 @@ namespace ttmath
 				: "=a" (c)
 				: "c" (b), "d" (index), "b" (p1), "S" (x1), "0" (x2)
 				: "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::AddTwoInts")
+		TTMATH_LOG("UInt::AddTwoInts")
+		
+		return c;
 	}
 
 
@@ -380,7 +374,6 @@ namespace ttmath
 		// this algorithm doesn't require it
 
 		#ifndef __GNUC__
-
 			__asm
 			{
 				mov ecx,[b]
@@ -404,6 +397,7 @@ namespace ttmath
 
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
 
 		#endif
@@ -435,10 +429,11 @@ namespace ttmath
 				: "D" (c), "c" (b), "b" (p1), "S" (p2)
 				: "%eax", "cc", "memory" );
 
-		return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Sub")
+		TTMATH_LOG("UInt::Sub")
+		
+		return c;
 	}
 
 
@@ -466,8 +461,9 @@ namespace ttmath
 	template<uint value_size>
 	uint UInt<value_size>::SubInt(uint value, uint index)
 	{
-	register uint b = value_size;
-	register uint * p1 = table;
+	uint b = value_size;
+	uint * p1 = table;
+	uint c;
 
 		TTMATH_ASSERT( index < value_size )
 
@@ -495,13 +491,12 @@ namespace ttmath
 			end:
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
 		#endif		
 			
 
 		#ifdef __GNUC__
-			register uint c;
-
 			__asm__ __volatile__(
 			
 				"push %%eax						\n"
@@ -528,12 +523,11 @@ namespace ttmath
 				: "=d" (c)
 				: "a" (value), "c" (b), "0" (index), "b" (p1)
 				: "cc", "memory" );
-
-			return c;
 		#endif
 		
-		TTMATH_LOG("UInt32::SubInt")
+		TTMATH_LOG("UInt::SubInt")
 	
+	return c;
 	}
 
 
@@ -577,6 +571,7 @@ namespace ttmath
 
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
 		#endif
 
@@ -606,12 +601,11 @@ namespace ttmath
 			: "=a" (c)
 			: "0" (c), "c" (b), "b" (p1)
 			: "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Rcl2_one")
+		TTMATH_LOG("UInt::Rcl2_one")
 
+	return c;
 	}
 
 
@@ -652,6 +646,7 @@ namespace ttmath
 
 				setc	al
 				movzx	eax, al
+				mov		[c], eax
 			}
 		#endif
 
@@ -677,11 +672,11 @@ namespace ttmath
 			: "=a" (c)
 			: "0" (c), "c" (b), "b" (p1)
 			: "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Rcr2_one")
+		TTMATH_LOG("UInt::Rcr2_one")
+		
+	return c;
 	}
 
 
@@ -743,6 +738,7 @@ namespace ttmath
 				jnz p
 
 				and eax, 1
+				mov	dword ptr [c], eax
 			}
 		#endif
 
@@ -790,11 +786,11 @@ namespace ttmath
 			: "=a" (c)
 			: "0" (c), "D" (b), "b" (p1), "c" (bits), [amask] "m" (mask)
 			: "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Rcl2")
+		TTMATH_LOG("UInt::Rcl2")
+		
+		return c;
 	}
 
 
@@ -860,6 +856,8 @@ namespace ttmath
 
 				rol eax, 1    // bit 31 will be bit 0
 				and eax, 1  
+				
+				mov	dword ptr [c], eax
 			}
 		#endif
 
@@ -910,11 +908,11 @@ namespace ttmath
 			: "=a" (c)
 			: "0" (c), "D" (b), "b" (p1), "c" (bits), [amask] "m" (mask)
 			: "cc", "memory" );
-
-			return c;
 		#endif
 
-		TTMATH_LOG("UInt32::Rcr2")
+		TTMATH_LOG("UInt::Rcr2")
+		
+		return c;
 	}
 
 
@@ -926,6 +924,7 @@ namespace ttmath
 	template<uint value_size>
 	sint UInt<value_size>::FindLeadingBitInWord(uint x)
 	{
+	sint result;
 
 		#ifndef __GNUC__
 			__asm
@@ -933,13 +932,13 @@ namespace ttmath
 				mov edx,-1
 				bsr eax,[x]
 				cmovz eax,edx
+				
+				mov [result], eax
 			}
 		#endif
 
 
 		#ifdef __GNUC__
-			register sint result;
-			
 			__asm__  __volatile__(
 
 			"bsrl %1, %0		\n"
@@ -951,9 +950,9 @@ namespace ttmath
 			: "R" (x)
 			: "cc" );
 
-			return result;
-
 		#endif
+		
+	return result;
 	}
 
 
@@ -976,6 +975,7 @@ namespace ttmath
 		TTMATH_ASSERT( bit < TTMATH_BITS_PER_UINT )
 
 		uint v = value;
+		uint old_bit;
 
 		#ifndef __GNUC__
 			__asm
@@ -987,13 +987,12 @@ namespace ttmath
 
 				setc bl
 				movzx ebx, bl
-				mov eax, ebx
+				mov [old_bit], ebx
 			}
 		#endif
 
 
 		#ifdef __GNUC__
-			uint old_bit;
 
 			__asm__  __volatile__(
 
@@ -1005,11 +1004,10 @@ namespace ttmath
 			: "=a" (v), "=b" (old_bit)
 			: "0" (v), "1" (bit)
 			: "cc" );
-
-			return old_bit;
 		#endif
 
 		value = v;
+		return old_bit;
 	}
 
 
@@ -1101,7 +1099,7 @@ namespace ttmath
 			these variables have similar meaning like those in
 			the multiplication algorithm MulTwoWords
 		*/
-
+																							
 		TTMATH_ASSERT( c != 0 )
 
 		#ifndef __GNUC__

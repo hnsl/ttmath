@@ -38,15 +38,16 @@
 #ifndef headerfilettmathuint_noasm
 #define headerfilettmathuint_noasm
 
-
 #ifdef TTMATH_NOASM
 
 /*!
-	\file ttmathuint_noasm.h
+	\file ttmathuint.h
     \brief template class UInt<uint> with methods without any assembler code
 
 	this file is included at the end of ttmathuint.h
 */
+
+#pragma message("TTMATH_NOASM")
 
 
 namespace ttmath
@@ -95,7 +96,7 @@ namespace ttmath
 		for(i=0 ; i<value_size ; ++i)
 			c = AddTwoWords(table[i], ss2.table[i], c, &table[i]);
 
-		TTMATH_LOG("UInt_noasm::Add")
+		TTMATH_LOG("UInt::Add")
 	
 	return c;
 	}
@@ -131,7 +132,7 @@ namespace ttmath
 		for(i=index+1 ; i<value_size && c ; ++i)
 			c = AddTwoWords(table[i], 0, c, &table[i]);
 
-		TTMATH_LOG("UInt_noasm::AddInt")
+		TTMATH_LOG("UInt::AddInt")
 	
 	return c;
 	}
@@ -184,7 +185,7 @@ namespace ttmath
 		for(i=index+2 ; i<value_size && c ; ++i)
 			c = AddTwoWords(table[i], 0, c, &table[i]);
 
-		TTMATH_LOG("UInt64::AddTwoInts")
+		TTMATH_LOG("UInt::AddTwoInts")
 	
 	return c;
 	}
@@ -232,7 +233,7 @@ namespace ttmath
 		for(i=0 ; i<value_size ; ++i)
 			c = SubTwoWords(table[i], ss2.table[i], c, &table[i]);
 
-		TTMATH_LOG("UInt_noasm::Sub")
+		TTMATH_LOG("UInt::Sub")
 
 	return c;
 	}
@@ -270,7 +271,7 @@ namespace ttmath
 		for(i=index+1 ; i<value_size && c ; ++i)
 			c = SubTwoWords(table[i], 0, c, &table[i]);
 
-		TTMATH_LOG("UInt_noasm::SubInt")
+		TTMATH_LOG("UInt::SubInt")
 	
 	return c;
 	}
@@ -305,7 +306,7 @@ namespace ttmath
 			c        = new_c;
 		}
 
-		TTMATH_LOG("UInt64::Rcl2_one")
+		TTMATH_LOG("UInt::Rcl2_one")
 
 	return c;
 	}
@@ -344,7 +345,7 @@ namespace ttmath
 			c        = new_c;
 		}
 
-		TTMATH_LOG("UInt64::Rcr2_one")
+		TTMATH_LOG("UInt::Rcr2_one")
 
 	return c;
 	}
@@ -421,7 +422,7 @@ namespace ttmath
 			c        = new_c;
 		}
 
-		TTMATH_LOG("UInt64::Rcr2")
+		TTMATH_LOG("UInt::Rcr2")
 
 	return (c & TTMATH_UINT_HIGHEST_BIT) ? 1 : 0;
 	}
@@ -879,7 +880,3 @@ namespace ttmath
 
 #endif //ifdef TTMATH_NOASM
 #endif
-
-
-
-

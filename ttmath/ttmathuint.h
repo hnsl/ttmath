@@ -976,7 +976,7 @@ public:
 		//	table[i] = result.table[i];
 
 		// testing carry
-		for( ; i<value_size*2 ; ++i)
+		for(i = value_size ; i<value_size*2 ; ++i)
 			if( result.table[i] != 0 )
 				return 1;
 
@@ -2877,7 +2877,7 @@ public:
 			ttmathuint_noasm.h
 	*/
 
-#ifdef TTMATH_NOASM
+#if defined(TTMATH_NOASM)
 	static uint AddTwoWords(uint a, uint b, uint carry, uint * result);
 	static uint SubTwoWords(uint a, uint b, uint carry, uint * result);
 
