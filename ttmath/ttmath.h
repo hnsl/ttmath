@@ -1,4 +1,3 @@
-
 /*
  * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
@@ -99,6 +98,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Round(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType result( x );
 		uint c = result.Round();
 
@@ -124,6 +131,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Ceil(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType result(x);
 		uint c = 0;
 
@@ -163,6 +178,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Floor(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType result(x);
 		uint c = 0;
 
@@ -203,8 +226,15 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Ln(const ValueType & x, ErrorCode * err = 0)
 	{
-	ValueType result;
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
 
+		return x; // NaN
+		}
+
+	ValueType result;
 		uint state = result.Ln(x);
 
 		if( err )
@@ -237,8 +267,15 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Log(const ValueType & x, const ValueType & base, ErrorCode * err = 0)
 	{
-	ValueType result;
+		if( x.IsNan() || base.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
 
+		return ValueType(); // default NaN
+		}
+
+	ValueType result;
 		uint state = result.Log(x, base);
 
 		if( err )
@@ -271,8 +308,15 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Exp(const ValueType & x, ErrorCode * err = 0)
 	{
-	ValueType result;
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
 
+		return x; // NaN
+		}
+
+	ValueType result;
 		uint c = result.Exp(x);
 
 		if( err )
@@ -468,6 +512,14 @@ namespace ttmath
 	ValueType one, result;
 	bool change_sign;	
 	
+		if( x.IsNan() )
+		{
+		if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		if( err )
 			*err = err_ok;
 	
@@ -479,7 +531,7 @@ namespace ttmath
 			// result has NaN flag set by default
 
 			if( err )
-				*err = err_overflow; // maybe another error code?
+				*err = err_overflow; // maybe another error code? err_improper_argument?
 
 		return result; // NaN is set by default
 		}
@@ -511,6 +563,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Cos(ValueType x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType pi05;
 		pi05.Set05Pi();
 
@@ -783,6 +843,14 @@ namespace ttmath
 		one.SetOne();
 		bool change_sign = false;
 
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		if( x.GreaterWithoutSignThan(one) )
 		{
 			if( err )
@@ -1005,6 +1073,9 @@ namespace ttmath
 		one.SetOne();
 		bool change_sign = false;
 
+		if( x.IsNan() )
+			return result; // NaN is set by default
+
 		// if x is negative we're using the formula:
 		// atan(-x) = -atan(x)
 		if( x.IsSign() )
@@ -1085,6 +1156,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Sinh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType ex, emx;
 		uint c = 0;
 
@@ -1109,6 +1188,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Cosh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType ex, emx;
 		uint c = 0;
 
@@ -1133,6 +1220,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Tanh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType ex, emx, nominator, denominator;
 		uint c = 0;
 
@@ -1173,6 +1268,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Coth(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		if( x.IsZero() )
 		{
 			if( err )
@@ -1230,6 +1333,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType ASinh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType xx(x), one, result;
 		uint c = 0;
 		one.SetOne();
@@ -1258,6 +1369,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType ACosh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType xx(x), one, result;
 		uint c = 0;
 		one.SetOne();
@@ -1299,6 +1418,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType ATanh(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType nominator(x), denominator, one, result;
 		uint c = 0;
 		one.SetOne();
@@ -1344,6 +1471,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType ACoth(const ValueType & x, ErrorCode * err = 0)
 	{
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return x; // NaN
+		}
+
 		ValueType nominator(x), denominator(x), one, result;
 		uint c = 0;
 		one.SetOne();
@@ -1402,6 +1537,14 @@ namespace ttmath
 	ValueType result, temp;
 	uint c = 0;
 
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		result = x;
 
 		// it is better to make division first and then multiplication
@@ -1429,6 +1572,14 @@ namespace ttmath
 	{
 	ValueType result, delimiter;
 	uint c = 0;
+
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
 
 		result = 180;
 		c += result.Mul(x);
@@ -1467,7 +1618,7 @@ namespace ttmath
 	ValueType delimiter, multipler;
 	uint c = 0;
 
-		if( m.IsSign() || s.IsSign() )
+		if( d.IsNan() || m.IsNan() || s.IsNan() || m.IsSign() || s.IsSign() )
 		{
 			if( err )
 				*err = err_improper_argument;
@@ -1521,6 +1672,14 @@ namespace ttmath
 	ValueType result, temp;
 	uint c = 0;
 
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		result = x;
 
 		// it is better to make division first and then multiplication
@@ -1549,6 +1708,14 @@ namespace ttmath
 	ValueType result, delimiter;
 	uint c = 0;
 
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		result = 200;
 		c += result.Mul(x);
 
@@ -1572,6 +1739,14 @@ namespace ttmath
 	{
 	ValueType result, temp;
 	uint c = 0;
+
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
 
 		result = x;
 
@@ -1615,6 +1790,14 @@ namespace ttmath
 	ValueType result, temp;
 	uint c = 0;
 
+		if( x.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return result; // NaN is set by default
+		}
+
 		result = x;
 
 		temp = 180;
@@ -1648,7 +1831,7 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Sqrt(ValueType x, ErrorCode * err = 0)
 	{
-		if( x.IsSign() )
+		if( x.IsNan() || x.IsSign() )
 		{
 			if( err )
 				*err = err_improper_argument;
@@ -1730,7 +1913,7 @@ namespace ttmath
 
 
 		template<class ValueType>
-		bool RootCheckIndexOne(ValueType & x, const ValueType & index, ErrorCode * err)
+		bool RootCheckIndexOne(const ValueType & index, ErrorCode * err)
 		{
 			ValueType one;
 			one.SetOne();
@@ -1772,11 +1955,12 @@ namespace ttmath
 
 
 		template<class ValueType>
-		bool RootCheckXZero(ValueType & x, const ValueType & index, ErrorCode * err)
+		bool RootCheckXZero(ValueType & x, ErrorCode * err)
 		{
 			if( x.IsZero() )
 			{
 				// root(0;index) is zero (if index!=0)
+				// RootCheckIndexZero() must be called beforehand
 				x.SetZero();
 
 				if( err )
@@ -1843,11 +2027,19 @@ namespace ttmath
 	{
 		using namespace auxiliaryfunctions;
 
+		if( x.IsNan() || index.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return ValueType(); // NaN is set by default
+		}
+
 		if( RootCheckIndexSign(x, index, err) ) return x;
 		if( RootCheckIndexZero(x, index, err) ) return x;
-		if( RootCheckIndexOne (x, index, err) ) return x;
+		if( RootCheckIndexOne (   index, err) ) return x;
 		if( RootCheckIndexFrac(x, index, err) ) return x;
-		if( RootCheckXZero(x, index, err) ) return x;
+		if( RootCheckXZero    (x,        err) ) return x;
 
 		// index integer and index!=0
 		// x!=0
@@ -1898,13 +2090,16 @@ namespace ttmath
 
 		while( !carry && multipler<maxvalue  )
 		{
-			// !! the test here we don't have to make in all iterations (performance)
-			if( stop && stop->WasStopSignal() )
+			if( stop && (multipler & 127)==0 ) // it means 'stop && (multipler % 128)==0'
 			{
+				// after each 128 iterations we make a test
+				if( stop->WasStopSignal() )
+				{
 				if( err )
 					*err = err_interrupt;
 
 			return 2;
+			}
 			}
 			
 			++multipler;
@@ -1928,20 +2123,25 @@ namespace ttmath
 
 		one.SetOne();
 		uint carry = 0;
+		uint iter = 1; // only for testing the stop object
 
 		while( !carry && multipler < x )
 		{
-			// !! the test here we don't have to make in all iterations (performance)
-			if( stop && stop->WasStopSignal() )
+			if( stop && (iter & 31)==0 ) // it means 'stop && (iter % 32)==0'
 			{
+				// after each 32 iterations we make a test
+				if( stop->WasStopSignal() )
+				{
 				if( err )
 					*err = err_interrupt;
 
 			return 2;
 			}
+			}
 			
 			carry += multipler.Add(one);
 			carry += result.Mul(multipler);
+			++iter;
 		}
 
 		if( err )
@@ -1968,17 +2168,15 @@ namespace ttmath
 	static History<ValueType> history;
 	ValueType result;
 
-		result.SetOne();
-		
-		if( x.IsSign() )
+		if( x.IsNan() || x.IsSign() )
 		{
 			if( err )
 				*err = err_improper_argument;
 
-			result.SetNan();
-
-		return result;
+		return result; // NaN set by default
 		}
+
+		result.SetOne();
 
 		if( !x.exponent.IsSign() && !x.exponent.IsZero() )
 		{
@@ -2065,6 +2263,14 @@ namespace ttmath
 	template<class ValueType>
 	ValueType Mod(ValueType a, const ValueType & b, ErrorCode * err = 0)
 	{
+		if( a.IsNan() || b.IsNan() )
+		{
+			if( err )
+				*err = err_improper_argument;
+
+		return ValueType(); // NaN is set by default
+		}
+
 		uint c = a.Mod(b);
 
 		if( err )
@@ -2083,5 +2289,12 @@ namespace ttmath
 	he can only use '#include <ttmath/ttmath.h>' even if he uses the parser
 */
 #include "ttmathparser.h"
+
+
+#ifdef _MSC_VER
+#pragma warning( default: 4127 )
+//warning C4127: conditional expression is constant
+#endif
+
 
 #endif

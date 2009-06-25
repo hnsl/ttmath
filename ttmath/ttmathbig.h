@@ -143,9 +143,8 @@ public:
 			return 0;
 
 		uint comp = mantissa.CompensationToLeft();
-		uint c    = exponent.Sub( comp );
 
-	return CheckCarry(c);
+	return exponent.Sub( comp );
 	}
 
 
@@ -540,6 +539,7 @@ public:
 		/*
 			we only have to test the mantissa
 			also we don't check the NaN flag
+			(maybe this method should return false if there is NaN flag set?)
 		*/
 		return mantissa.IsZero();
 	}
@@ -587,6 +587,7 @@ public:
 	*/
 	void Sgn()
 	{
+		// we have to check the NaN flag, because the next SetOne() method would clear it
 		if( IsNan() )
 			return;
 
@@ -622,6 +623,7 @@ public:
 
 	/*!
 		this method changes the sign
+		when there is a value of zero then the sign is not changed
 
 			e.g.
 			-1 -> 1
@@ -629,6 +631,8 @@ public:
 	*/
 	void ChangeSign()
 	{
+		// we don't have to check the NaN flag here
+
 		if( info & TTMATH_BIG_SIGN )
 		{
 			info &= ~TTMATH_BIG_SIGN;
@@ -708,7 +712,14 @@ public:
 			// there shouldn't be a carry here because
 			// (1) (2) guarantee that the mantissa of this
 			// is greater than or equal to the mantissa of the ss2
-			TTMATH_VERIFY( mantissa.Sub(ss2.mantissa) >= 0 )
+			
+			#ifdef TTMATH_DEBUG
+			// this is to get rid of a warning saying that c_temp is not used
+			uint c_temp = /* mantissa.Sub(ss2.mantissa); */
+			#endif
+			mantissa.Sub(ss2.mantissa);
+
+			TTMATH_ASSERT( c_temp == 0 )
 		}
 
 		c += Standardizing();
@@ -1393,19 +1404,17 @@ public:
 		denominator.SetOne();
 		denominator_i.SetOne();
 
-		// every 'step_test' times we make a test
-		const uint step_test = 5;
 		uint i;
 		old_value = *this;
 
-		// we begin from 1 in order to not testing at the beginning
+		// we begin from 1 in order to not test at the beginning
 	#ifdef TTMATH_CONSTANTSGENERATOR
 		for(i=1 ; true ; ++i)
 	#else
 		for(i=1 ; i<=TTMATH_ARITHMETIC_MAX_LOOP ; ++i)
 	#endif
 		{
-			bool testing = ((i % step_test) == 0);
+			bool testing = ((i & 3) == 0); // it means '(i % 4) == 0'
 
 			next_part = numerator;
 
@@ -1418,13 +1427,15 @@ public:
 			// there shouldn't be a carry here
 			Add( next_part );
 
-			if( testing && old_value==*this )
+			if( testing )
+			{
+				if( old_value == *this )
 				// we've added next few parts of the formula but the result
 				// is still the same then we break the loop
 				break;
 			else
 				old_value = *this;
-
+			}
 
 			// we set the denominator and the numerator for a next part of the formula
 			if( denominator_i.Add(one) )
@@ -1559,20 +1570,17 @@ public:
 		SetZero();
 
 		old_value = *this;
-		
-		// every 'step_test' times we make a test
-		const uint step_test = 5;
 		uint i;
 
 
 	#ifdef TTMATH_CONSTANTSGENERATOR
 		for(i=1 ; true ; ++i)
 	#else
-		// we begin from 1 in order to not testing at the beginning
+		// we begin from 1 in order to not test at the beginning
 		for(i=1 ; i<=TTMATH_ARITHMETIC_MAX_LOOP ; ++i)
 	#endif
 		{
-			bool testing = ((i % step_test) == 0);
+			bool testing = ((i & 3) == 0); // it means '(i % 4) == 0'
 
 			next_part = x1;
 
@@ -1585,12 +1593,15 @@ public:
 			// there shouldn't be a carry here
 			Add(next_part);
 
-			if( testing && old_value == *this )
+			if( testing )
+			{
+				if( old_value == *this )
 				// we've added next (step_test) parts of the formula but the result
 				// is still the same then we break the loop
 				break;
 			else
 				old_value = *this;
+			}
 
 			if( x1.Mul(x2) )
 				// if there is a carry here the result we return as good
@@ -2021,9 +2032,10 @@ public:
 			// If E=2047 and F is zero and S is 1, then V=-Infinity
 			// If E=2047 and F is zero and S is 0, then V=Infinity
 
-			// at the moment we do not support NaN, -Infinity and +Infinity
+			// we do not support -Infinity and +Infinity
+			// we assume that there is always NaN 
 
-			SetZero();
+			SetNan();
 		}
 		else
 		if( e > 0 )
@@ -2134,9 +2146,10 @@ public:
 			// If E=2047 and F is zero and S is 1, then V=-Infinity
 			// If E=2047 and F is zero and S is 0, then V=Infinity
 
-			// at the moment we do not support NaN, -Infinity and +Infinity
+			// we do not support -Infinity and +Infinity
+			// we assume that there is always NaN 
 
-			SetZero();
+			SetNan();
 		}
 		else
 		if( e > 0 )
@@ -2226,12 +2239,19 @@ public:
 			return 0;
 		}
 
+		if( IsNan() )
+		{
+			result = ToDouble_SetDouble( false, 2047, 0, false, true);
+
+		return 0;
+		}
+
 		sint e_correction = sint(man*TTMATH_BITS_PER_UINT) - 1;
 
 		if( exponent >= 1024 - e_correction )
 		{
 			// +/- infinity
-			result = ToDouble_SetDouble( IsSign(), 2047, 0, true);
+			result = ToDouble_SetDouble( 0, 2047, 0, true);
 
 		return 1;
 		}
@@ -2266,7 +2286,7 @@ private:
 #ifdef TTMATH_PLATFORM32
 
 	// 32bit platforms
-	double ToDouble_SetDouble(bool is_sign, uint e, sint move, bool infinity = false) const
+	double ToDouble_SetDouble(bool is_sign, uint e, sint move, bool infinity = false, bool nan = false) const
 	{
 		union 
 		{
@@ -2280,6 +2300,12 @@ private:
 			temp.u[1] |= 0x80000000u;
 
 		temp.u[1] |= (e << 20) & 0x7FF00000u;
+
+		if( nan )
+		{
+			temp.u[0] |= 1;
+			return temp.d;
+		}
 
 		if( infinity )
 			return temp.d;
@@ -2303,7 +2329,7 @@ private:
 #else
 
 	// 64bit platforms
-	double ToDouble_SetDouble(bool is_sign, uint e, sint move, bool infinity = false) const
+	double ToDouble_SetDouble(bool is_sign, uint e, sint move, bool infinity = false, bool nan = false) const
 	{
 		union 
 		{
@@ -2317,6 +2343,12 @@ private:
 			temp.u |= 0x8000000000000000ul;
 		                
 		temp.u |= (e << 52) & 0x7FF0000000000000ul;
+
+		if( nan )
+		{
+			temp.u |= 1;
+			return temp.d;
+		}
 
 		if( infinity )
 			return temp.d;
@@ -2600,7 +2632,12 @@ public:
 	*/
 	Big()
 	{
-		SetNan();
+		info = TTMATH_BIG_NAN;
+
+		/*
+			we're directly setting 'info' (instead of calling SetNan())
+			in order to get rid of a warning saying that 'info' is uninitialized
+		*/
 	}
 
 
@@ -2682,7 +2719,8 @@ public:
 		output:
 			return value:
 			0 - ok and 'result' will be an object of type tstr_t which holds the value
-			1 - if there was a carry 
+			1 - if there was a carry (shoudn't be in a normal situation - if is that means there
+			    is somewhere an error in the library)
 	*/
 	uint ToString(	tstr_t & result,
 					uint base                  = 10,
@@ -3100,7 +3138,7 @@ private:
 			else
 				was_carry = false;
 
-			new_man[i] = UInt<man>::DigitToChar( digit );
+			new_man[i] = static_cast<char>( UInt<man>::DigitToChar(digit) );
 		}
 
 		if( i<0 && was_carry )
@@ -3826,6 +3864,25 @@ public:
 	return false;
 	}
 
+	bool IsNearZero() const
+	{
+		// we should check the mantissas beforehand because sometimes we can have
+		// a mantissa set to zero but in the exponent something another value
+		// (maybe we've forgotten about calling CorrectZero() ?)
+		if( mantissa.IsZero() )
+			{
+			return true;
+			}
+
+		UInt<man>	m(mantissa);
+			
+		m.Rcr(man*3); // pi * thumb rule...
+			
+		return(m.IsZero());
+
+	return false;
+	}
+
 
 	bool operator<(const Big<exp,man> & ss2) const
 	{
@@ -3856,6 +3913,14 @@ public:
 	return EqualWithoutSign( ss2 );
 	}
 
+
+	bool operator^=(const Big<exp,man> & ss2) const
+	{
+		if( IsSign() != ss2.IsSign() )
+			return false;
+
+	return AboutEqualWithoutSign( ss2 );
+	}
 
 
 

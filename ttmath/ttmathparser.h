@@ -1,5 +1,5 @@
 /*
- * This file is a part of TTMath Mathematical Library
+ * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
  * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
  */
@@ -973,7 +973,7 @@ void Not(int sindex, int amount_of_args, ValueType & result)
 
 void DegToRad(int sindex, int amount_of_args, ValueType & result)
 {
-	ErrorCode err;
+	ErrorCode err = err_ok;
 
 	if( amount_of_args == 1 )
 	{
@@ -1052,7 +1052,7 @@ void RadToGrad(int sindex, int amount_of_args, ValueType & result)
 
 void DegToGrad(int sindex, int amount_of_args, ValueType & result)
 {
-	ErrorCode err;
+	ErrorCode err = err_ok;
 
 	if( amount_of_args == 1 )
 	{
@@ -1555,7 +1555,7 @@ int character;
 
 	do
 	{
-		result   += character;
+		result   += static_cast<char>( character );
 		character = * ++pstring;
 	}
 	while(	(character>='a' && character<='z') ||
