@@ -3864,25 +3864,35 @@ public:
 	return false;
 	}
 
-	bool IsNearZero() const
+	bool AboutEqualWithoutSign(const Big<exp,man> & ss2, int nBitsToIgnore = 4) const
 	{
 		// we should check the mantissas beforehand because sometimes we can have
 		// a mantissa set to zero but in the exponent something another value
 		// (maybe we've forgotten about calling CorrectZero() ?)
-		if( mantissa.IsZero() )
-			{
+		if( mantissa.IsZero() && ss2.mantissa.IsZero())
+		{
 			return true;
-			}
+		}
 
-		UInt<man>	m(mantissa);
-			
-		m.Rcr(man*3); // pi * thumb rule...
-			
-		return(m.IsZero());
+		if( exponent==ss2.exponent )
+		{
+			if (mantissa == ss2.mantissa)
+				{
+				return(true);
+				}
+			ASSERT(nBitsToIgnore < TTMATH_BITS_PER_UINT);
+
+			for (int n = man-1; n > 0; --n)
+				{
+				if (mantissa.table[n] != ss2.mantissa.table[n])
+					return(false);
+				}
+			uint	nMask = ~((1 << nBitsToIgnore) - 1);
+			return((mantissa.table[0] & nMask) == (ss2.mantissa.table[0] & nMask));
+		}
 
 	return false;
 	}
-
 
 	bool operator<(const Big<exp,man> & ss2) const
 	{
@@ -3912,16 +3922,6 @@ public:
 
 	return EqualWithoutSign( ss2 );
 	}
-
-
-	bool operator^=(const Big<exp,man> & ss2) const
-	{
-		if( IsSign() != ss2.IsSign() )
-			return false;
-
-	return AboutEqualWithoutSign( ss2 );
-	}
-
 
 
 	bool operator>(const Big<exp,man> & ss2) const
