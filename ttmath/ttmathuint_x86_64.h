@@ -858,6 +858,7 @@ namespace ttmath
 	 *
 	*/
 	
+	#ifndef __GNUC__
 
 	/*!
 		this method calculates 64bits word a:b / 32bits c (a higher, b lower word)
@@ -1036,6 +1037,7 @@ namespace ttmath
 	return c;
 	}
 
+	#endif // #ifndef __GNUC__
 
 } //namespace
 

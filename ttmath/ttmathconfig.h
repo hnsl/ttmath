@@ -27,37 +27,36 @@
 		distribution.
  */
 
-#ifndef headerfilettmathmathttconfig
-#define headerfilettmathmathttconfig
+#ifndef headerfilettmathconfig
+#define headerfilettmathconfig
 #pragma once
 
 #include <sstream>
 
 namespace ttmath
 {
-
-#if defined(_MSC_VER)
-	#include <windows.h>
-	#if defined(_UNICODE)
+	#if defined(TTMATH_USE_WCHAR)
 		typedef	wchar_t					tchar_t;
 		typedef	std::wstring			tstr_t;
 		typedef std::wostringstream		tostrstrm_t;
 		typedef std::wostream			tostrm_t;
 		typedef std::wistream			tistrm_t;
+
+		#define __TTMATH_TEXT(quote) 	L ## quote
 	#else
 		typedef	char					tchar_t;
 		typedef	std::string				tstr_t;
 		typedef std::ostringstream		tostrstrm_t;
 		typedef std::ostream			tostrm_t;
 		typedef std::istream			tistrm_t;
+
+		#define __TTMATH_TEXT(quote) 	quote
 	#endif
+
+	#define TTMATH_TEXT(quote) 	__TTMATH_TEXT(quote)
 	
-	#if defined(_UNICODE)
-		#define __TEXT(quote) 	L ## quote
-	  #else
-		#define __TEXT(quote) 	quote
-	#endif
-	#define TTMATH_TEXT(quote) 	__TEXT(quote)
+#if defined(WIN32)
+	#include <windows.h>
 	
 	#if defined(_MT)
 		class 	clsCrit
@@ -116,19 +115,16 @@ namespace ttmath
 				}
 		#define TTMATH_USE_THREADSAFE_OBJ(c)	clsCritObj	lock(c)
 	#endif
-#else // not MS compiler
-	typedef	char					tchar_t;
-	typedef	std::string				tstr_t;
-	typedef std::ostringstream		tostrstrm_t;
-	typedef std::ostream			tostrm_t;
-	typedef std::istream			tistrm_t;
+#else // defined(WIN32) 
+	// not Windows world: no threading synchronization for now
 #endif
 
 #if !defined(TTMATH_IMPLEMENT_THREADSAFE_OBJ)
+	// if we don't know about serialization, make it a no-op
 	#define TTMATH_IMPLEMENT_THREADSAFE_OBJ		/* */
 	#define TTMATH_USE_THREADSAFE_OBJ(c)		/* */
 #endif
 
 } // namespace
 
-#endif // headerfilettmathmathttconfig
+#endif // headerfilettmathconfig
