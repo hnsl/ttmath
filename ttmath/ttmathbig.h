@@ -3864,7 +3864,7 @@ public:
 	return false;
 	}
 
-	bool AboutEqualWithoutSign(const Big<exp,man> & ss2, int nBitsToIgnore = 4) const
+	bool AboutEqual(const Big<exp,man> & ss2, int nBitsToIgnore = 4) const
 	{
 		// we should check the mantissas beforehand because sometimes we can have
 		// a mantissa set to zero but in the exponent something another value
@@ -3874,12 +3874,30 @@ public:
 			return true;
 		}
 
+		if( IsSign() != ss2.IsSign() )
+		{
+			return false;
+		}
+		
 		if( exponent==ss2.exponent )
 		{
 			if (mantissa == ss2.mantissa)
 				{
 				return(true);
 				}
+			if( IsSign() != ss2.IsSign() )
+				{
+				// we need to check the difference (both might be around Zero)
+				Big<exp,man>	temp(*this);
+				
+				temp.Sub(ss2);
+
+				Int<exp>	exponent_diff(exponent - temp.exponent);			
+				
+				return(exponent_diff > man*TTMATH_BITS_PER_UINT-nBitsToIgnore);
+				}
+				
+			// faster to mask the bits!
 			ASSERT(nBitsToIgnore < TTMATH_BITS_PER_UINT);
 
 			for (int n = man-1; n > 0; --n)
