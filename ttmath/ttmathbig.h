@@ -3869,47 +3869,66 @@ public:
 		// we should check the mantissas beforehand because sometimes we can have
 		// a mantissa set to zero but in the exponent something another value
 		// (maybe we've forgotten about calling CorrectZero() ?)
-		if( mantissa.IsZero() && ss2.mantissa.IsZero())
-		{
-			return true;
-		}
-
-		if( IsSign() != ss2.IsSign() )
-		{
-			return false;
-		}
+		if( mantissa.IsZero())
+			{
+			if (ss2.mantissa.IsZero())
+				return true;
+			return(ss2.AboutEqual(*this,nBitsToIgnore));
+			}
 		
-		if( exponent==ss2.exponent )
-		{
-			if (mantissa == ss2.mantissa)
-				{
-				return(true);
-				}
-			if( IsSign() != ss2.IsSign() )
-				{
-				// we need to check the difference (both might be around Zero)
-				Big<exp,man>	temp(*this);
-				
-				temp.Sub(ss2);
+		if (ss2.mantissa.IsZero())
+			{
+			return(this->exponent <= uint(2*(-sint(man*TTMATH_BITS_PER_UINT))+nBitsToIgnore));
+			}
+			
+		// exponents may not differ much!
+		ttmath::Int<exp>	expdiff(this->exponent - ss2.exponent);
+		
+		// they may differ one if for example mantissa1=0x80000000, mantissa2=0xffffffff
+		if (ttmath::Abs(expdiff) > 1)
+			return(false);		
 
-				Int<exp>	exponent_diff(exponent - temp.exponent);			
-				
-				return(exponent_diff > man*TTMATH_BITS_PER_UINT-nBitsToIgnore);
-				}
-				
-			// faster to mask the bits!
-			ASSERT(nBitsToIgnore < TTMATH_BITS_PER_UINT);
+		// calculate the 'difference' mantissa		
+		ttmath::UInt<man>	man1(this->mantissa);
+		ttmath::UInt<man>	man2(ss2.mantissa);
+		ttmath::UInt<man>	mandiff;
+		
+		switch (expdiff.ToInt())
+			{
+			case +1:
+				man2.Rcr(1,0);
+				mandiff = man1;
+				mandiff.Sub(man2);
+				break;
+			case -1:
+				man1.Rcr(1,0);
+				mandiff = man2;
+				mandiff.Sub(man1);
+				break;
+			case 0:
+				if (man2 > man1)
+					{
+					mandiff = man2;
+					mandiff.Sub(man1);
+					}
+				  else
+					{
+					mandiff = man1;
+					mandiff.Sub(man2);
+					}
+				break;
+			}
+			
+		// faster to mask the bits!
+		ASSERT(nBitsToIgnore < TTMATH_BITS_PER_UINT);
 
-			for (int n = man-1; n > 0; --n)
-				{
-				if (mantissa.table[n] != ss2.mantissa.table[n])
-					return(false);
-				}
-			uint	nMask = ~((1 << nBitsToIgnore) - 1);
-			return((mantissa.table[0] & nMask) == (ss2.mantissa.table[0] & nMask));
-		}
-
-	return false;
+		for (int n = man-1; n > 0; --n)
+			{
+			if (mandiff.table[n] != 0)
+				return(false);
+			}
+		uint	nMask = ~((1 << nBitsToIgnore) - 1);
+		return((mandiff.table[0] & nMask) == 0);
 	}
 
 	bool operator<(const Big<exp,man> & ss2) const

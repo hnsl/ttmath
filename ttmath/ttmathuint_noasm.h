@@ -871,6 +871,83 @@ namespace ttmath
 		u3         = sub_res_low_.u_.low;
 	}
 
+	/*!
+		this static method addes one vector to the other
+		'ss1' is larger in size or equal to 'ss2'
+
+		ss1 points to the first (larger) vector
+		ss2 points to the second vector
+		ss1_size - size of the ss1 (and size of the result too)
+		ss2_size - size of the ss2
+		result - is the result vector (which has size the same as ss1: ss1_size)
+
+		Example:  ss1_size is 5, ss2_size is 3
+		ss1:      ss2:   result (output):
+		  5        1         5+1
+		  4        3         4+3
+		  2        7         2+7
+		  6                  6
+		  9                  9
+	  of course the carry is propagated and will be returned from the last item
+	  (this method is used by the Karatsuba multiplication algorithm)
+	*/
+	template<uint value_size>
+	uint UInt<value_size>::AddVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
+	{
+	uint i, c = 0;
+
+		TTMATH_ASSERT( ss1_size >= ss2_size )
+		
+		for(i=0 ; i<ss2_size ; ++i)
+			c = AddTwoWords(ss1[i], ss2[i], c, &result[i]);
+
+		for( ; i<ss1_size ; ++i)
+			c = AddTwoWords(ss1[i], 0, c, &result[i]);
+
+		TTMATH_LOG("UInt::AddVector")
+
+	return c;
+	}
+
+	/*!
+		this static method subtractes one vector from the other
+		'ss1' is larger in size or equal to 'ss2'
+
+		ss1 points to the first (larger) vector
+		ss2 points to the second vector
+		ss1_size - size of the ss1 (and size of the result too)
+		ss2_size - size of the ss2
+		result - is the result vector (which has size the same as ss1: ss1_size)
+
+		Example:  ss1_size is 5, ss2_size is 3
+		ss1:      ss2:   result (output):
+		  5        1         5-1
+		  4        3         4-3
+		  2        7         2-7
+		  6                  6-1  (the borrow from previous item)
+		  9                  9
+		                 return (carry): 0
+	  of course the carry (borrow) is propagated and will be returned from the last item
+	  (this method is used by the Karatsuba multiplication algorithm)
+	*/
+	template<uint value_size>
+	uint UInt<value_size>::SubVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
+	{
+	uint i, c = 0;
+
+		TTMATH_ASSERT( ss1_size >= ss2_size )
+		
+		for(i=0 ; i<ss2_size ; ++i)
+			c = SubTwoWords(ss1[i], ss2[i], c, &result[i]);
+
+		for( ; i<ss1_size ; ++i)
+			c = SubTwoWords(ss1[i], 0, c, &result[i]);
+
+		TTMATH_LOG("UInt::SubVector")
+
+	return c;
+	}
+
 #endif // #ifdef TTMATH_PLATFORM64
 
 

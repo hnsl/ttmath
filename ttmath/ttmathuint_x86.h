@@ -42,7 +42,7 @@
 #ifndef TTMATH_NOASM
 #ifdef TTMATH_PLATFORM32
 
-#pragma message("TTMATH_ASM")
+#pragma message("TTMATH_ASM32")
 
 /*!
 	\file ttmathuint_x86.h

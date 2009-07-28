@@ -4,20 +4,20 @@
  * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
  */
 
-/* 
+/*
  * Copyright (c) 2006-2009, Tomasz Sowa
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *  * Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
- *    
+ *
  *  * Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *    
+ *
  *  * Neither the name Tomasz Sowa nor the names of contributors to this
  *    project may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
@@ -39,16 +39,19 @@
 #ifndef headerfilettmathuint_x86_64
 #define headerfilettmathuint_x86_64
 
-
 #ifndef TTMATH_NOASM
 #ifdef TTMATH_PLATFORM64
 
+#pragma message("TTMATH_ASM64")
 /*!
 	\file ttmathuint_x86_64.h
     \brief template class UInt<uint> with assembler code for 64bit x86_64 processors
 
 	this file is included at the end of ttmathuint.h
 */
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 
 namespace ttmath
@@ -113,14 +116,14 @@ namespace ttmath
 				this part should be compiled with gcc
 			*/
 			__asm__ __volatile__(
-	
+
 				"xorq %%rdx, %%rdx				\n"
 				"neg %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
 
 			"1:									\n"
 				"movq (%%rsi,%%rdx,8), %%rax	\n"
 				"adcq %%rax, (%%rbx,%%rdx,8)	\n"
-			
+
 				"incq %%rdx						\n"
 				"decq %%rcx						\n"
 			"jnz 1b								\n"
@@ -134,7 +137,7 @@ namespace ttmath
 		#endif
 
 		TTMATH_LOG("UInt64::Add")
-	
+
 	return c;
 	}
 
@@ -150,7 +153,7 @@ namespace ttmath
 		if we've got (value_size=3):
 			table[0] = 10;
 			table[1] = 30;
-			table[2] = 5;	
+			table[2] = 5;
 		and we call:
 			AddInt(2,1)
 		then it'll be:
@@ -187,7 +190,7 @@ namespace ttmath
 			"1:									\n"
 				"addq %%rax, (%%rbx,%%rdx,8)	\n"
 			"jnc 2f								\n"
-				
+
 				"movq $1, %%rax					\n"
 				"incq %%rdx						\n"
 				"decq %%rcx						\n"
@@ -204,7 +207,7 @@ namespace ttmath
 		#endif
 
 		TTMATH_LOG("UInt64::AddInt")
-	
+
 	return c;
 	}
 
@@ -236,14 +239,38 @@ namespace ttmath
 			table[1] = 4 + x1 = 14
 			table[2] = 5 + x2 = 25
 			table[3] = 6
-		
+
 		and no carry at the end of table[3]
 
-		(of course if there was a carry in table[2](5+20) then 
+		(of course if there was a carry in table[2](5+20) then
 		this carry would be passed to the table[3] etc.)
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::AddTwoInts(uint x2, uint x1, uint index)
+	#if 0
+	{
+	uint i, c;
+
+		TTMATH_ASSERT( index < value_size )
+
+		printf("add %Id + %Id\n",x1,x2);
+		for(int i=index ; i<value_size ; ++i)
+			printf("%d: %Id\n",i,table[i]);
+
+		c = AddTwoWords(table[index],   x1, 0, &table[index]);
+		c = AddTwoWords(table[index+1], x2, c, &table[index+1]);
+
+		for(i=index+2 ; i<value_size && c ; ++i)
+			c = AddTwoWords(table[i], 0, c, &table[i]);
+		for(i=index ; i<value_size ; ++i)
+			printf("%d: %Id\n",i,table[i]);
+		printf(" -> %d\n",c);
+
+		TTMATH_LOG("UInt::AddTwoInts")
+
+	return c;
+	}
+	#else
 	{
 	uint b = value_size;
 	uint * p1 = table;
@@ -253,7 +280,14 @@ namespace ttmath
 
 		#ifndef __GNUC__
 			#if defined(_M_X64)
-				c = addindexed2_x64(p1,b,index,x2,x1);
+				//printf("add %Id + %Id\n",x1,x2);
+				//for(int i=index ; i<value_size ; ++i)
+				//	printf("%d: %Id\n",i,table[i]);
+				//if (table[0] == 1265784741359897913) DebugBreak();
+				c = addindexed2_x64(p1,b,index,x1,x2);
+				//for(int i=index ; i<value_size ; ++i)
+				//	printf("%d: %Id\n",i,table[i]);
+				//printf(" -> %d\n",c);
 			#else
 				#error "another compiler than GCC is currently not supported in 64bit mode"
 			#endif
@@ -261,11 +295,11 @@ namespace ttmath
 
 		#ifdef __GNUC__
 			uint dummy, dummy2;
-			
+
 			__asm__ __volatile__(
-			
+
 				"subq %%rdx, %%rcx 				\n"
-				
+
 				"addq %%rsi, (%%rbx,%%rdx,8) 	\n"
 				"incq %%rdx						\n"
 				"decq %%rcx						\n"
@@ -289,10 +323,12 @@ namespace ttmath
 
 		#endif
 
+
 		TTMATH_LOG("UInt64::AddTwoInts")
 
 	return c;
 	}
+	#endif
 
 
 
@@ -328,16 +364,16 @@ namespace ttmath
 
 		#ifdef __GNUC__
 			uint dummy, dummy2;
-			
+
 			__asm__  __volatile__(
-	
+
 				"xorq %%rdx, %%rdx				\n"
 				"neg %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
 
 			"1:									\n"
 				"movq (%%rsi,%%rdx,8), %%rax	\n"
 				"sbbq %%rax, (%%rbx,%%rdx,8)	\n"
-			
+
 				"incq %%rdx						\n"
 				"decq %%rcx						\n"
 			"jnz 1b								\n"
@@ -366,7 +402,7 @@ namespace ttmath
 		if we've got (value_size=3):
 			table[0] = 10;
 			table[1] = 30;
-			table[2] = 5;	
+			table[2] = 5;
 		and we call:
 			SubInt(2,1)
 		then it'll be:
@@ -395,15 +431,15 @@ namespace ttmath
 
 		#ifdef __GNUC__
 			uint dummy, dummy2;
-			
+
 			__asm__ __volatile__(
-			
+
 				"subq %%rdx, %%rcx 				\n"
 
 			"1:									\n"
 				"subq %%rax, (%%rbx,%%rdx,8)	\n"
 			"jnc 2f								\n"
-				
+
 				"movq $1, %%rax					\n"
 				"incq %%rdx						\n"
 				"decq %%rcx						\n"
@@ -436,7 +472,7 @@ namespace ttmath
 		for example:
 		let this is 001010000
 		after Rcl2_one(1) there'll be 010100001 and Rcl2_one returns 0
-	
+
 		***this method is created only on a 64bit platform***
 	*/
 	template<uint value_size>
@@ -455,9 +491,9 @@ namespace ttmath
 
 		#ifdef __GNUC__
 		uint dummy, dummy2;
-		
+
 		__asm__  __volatile__(
-		
+
 			"xorq %%rdx, %%rdx			\n"   // rdx=0
 			"neg %%rax					\n"   // CF=1 if rax!=0 , CF=0 if rax==0
 
@@ -473,7 +509,7 @@ namespace ttmath
 			: "=c" (c), "=a" (dummy), "=d" (dummy2)
 			: "1" (c), "0" (b), "b" (p1)
 			: "cc", "memory" );
-	
+
 		#endif
 
 		TTMATH_LOG("UInt64::Rcl2_one")
@@ -512,7 +548,7 @@ namespace ttmath
 
 		#ifdef __GNUC__
 		uint dummy;
-		
+
 		__asm__  __volatile__(
 
 			"neg %%rax						\n"   // CF=1 if rax!=0 , CF=0 if rax==0
@@ -549,7 +585,7 @@ namespace ttmath
 		for example:
 		let this is 001010000
 		after Rcl2(3, 1) there'll be 010000111 and Rcl2 returns 1
-	
+
 		***this method is created only on a 64bit platform***
 	*/
 	template<uint value_size>
@@ -570,9 +606,9 @@ namespace ttmath
 
 		#ifdef __GNUC__
 		uint dummy, dummy2, dummy3;
-		
+
 		__asm__  __volatile__(
-		
+
 			"movq %%rcx, %%rsi				\n"
 			"movq $64, %%rcx				\n"
 			"subq %%rsi, %%rcx				\n"
@@ -595,11 +631,11 @@ namespace ttmath
 			"xorq %%rax, (%%rbx,%%rdx,8)	\n"
 			"orq  %%rsi, (%%rbx,%%rdx,8)	\n"
 			"movq %%rax, %%rsi				\n"
-			
+
 			"incq %%rdx						\n"
 			"decq %%rdi						\n"
 		"jnz 1b								\n"
-			
+
 			"and $1, %%rax					\n"
 
 			: "=a" (c), "=D" (dummy), "=S" (dummy2), "=d" (dummy3)
@@ -647,7 +683,7 @@ namespace ttmath
 
 		#ifdef __GNUC__
 			uint dummy, dummy2, dummy3;
-			
+
 			__asm__  __volatile__(
 
 			"movq %%rcx, %%rsi				\n"
@@ -674,11 +710,11 @@ namespace ttmath
 			"xorq %%rax, (%%rbx,%%rdx,8)	\n"
 			"orq  %%rsi, (%%rbx,%%rdx,8)	\n"
 			"movq %%rax, %%rsi				\n"
-			
+
 			"decq %%rdx						\n"
 			"decq %%rdi						\n"
 		"jnz 1b								\n"
-			
+
 			"rolq $1, %%rax					\n"
 			"andq $1, %%rax					\n"
 
@@ -754,7 +790,7 @@ namespace ttmath
 	uint UInt<value_size>::SetBitInWord(uint & value, uint bit)
 	{
 		TTMATH_ASSERT( bit < TTMATH_BITS_PER_UINT )
-		
+
 		uint old_bit;
 		uint v = value;
 
@@ -778,7 +814,7 @@ namespace ttmath
 
 			"setc %%bl				\n"
 			"movzx %%bl, %%rbx		\n"
-			
+
 			: "=a" (v), "=b" (old_bit)
 			: "0" (v), "1" (bit)
 			: "cc" );
@@ -803,7 +839,7 @@ namespace ttmath
 		multiplication: result2:result1 = a * b
 		result2 - higher word
 		result1 - lower word of the result
-	
+
 		this methos never returns a carry
 
 		***this method is created only on a 64bit platform***
@@ -834,7 +870,7 @@ namespace ttmath
 		#ifdef __GNUC__
 
 		__asm__ __volatile__(
-		
+
 			"mulq %%rdx			\n"
 
 			: "=a" (result1_), "=d" (result2_)
@@ -857,13 +893,13 @@ namespace ttmath
 	 *
 	 *
 	*/
-	
+
 	#ifndef __GNUC__
 
 	/*!
 		this method calculates 64bits word a:b / 32bits c (a higher, b lower word)
 		r = a:b / c and rest - remainder
-		
+
 		***this method is created only on a 64bit platform***
 
 		*
@@ -896,7 +932,7 @@ namespace ttmath
 		#endif
 
 		#ifdef __GNUC__
-		
+
 			__asm__ __volatile__(
 
 			"divq %%rcx				\n"
@@ -986,7 +1022,7 @@ namespace ttmath
 	uint i, c = 0;
 
 		TTMATH_ASSERT( ss1_size >= ss2_size )
-		
+
 		for(i=0 ; i<ss2_size ; ++i)
 			c = AddTwoWords(ss1[i], ss2[i], c, &result[i]);
 
@@ -1025,7 +1061,7 @@ namespace ttmath
 	uint i, c = 0;
 
 		TTMATH_ASSERT( ss1_size >= ss2_size )
-		
+
 		for(i=0 ; i<ss2_size ; ++i)
 			c = SubTwoWords(ss1[i], ss2[i], c, &result[i]);
 
