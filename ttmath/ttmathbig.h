@@ -1,7 +1,7 @@
 /*
  * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
- * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
+ * Author: Tomasz Sowa <t.sowa@ttmath.org>
  */
 
 /* 
@@ -37,6 +37,8 @@
 
 #ifndef headerfilettmathbig
 #define headerfilettmathbig
+
+#include "ttmathconfig.h"
 
 /*!
 	\file ttmathbig.h
@@ -85,7 +87,7 @@ public:
 
 Int<exp>	exponent;
 UInt<man>	mantissa;
-tchar_t		info;
+tt_char		info;
 
 
 /*!
@@ -271,7 +273,7 @@ private:
 		// 3101 digits were taken from this website
 		//  (later the digits were compared with:
 		//   http://www.eveandersson.com/pi/digits/1000000 and http://www.geom.uiuc.edu/~huberty/math5337/groupe/digits.html )
-		// and they were set into Big<1,400> type (using operator=(const tchar_t*) on a 32bit platform)
+		// and they were set into Big<1,400> type (using operator=(const tt_char*) on a 32bit platform)
 		// and then the first 256 words were taken into this table
 		// (TTMATH_BUILTIN_VARIABLES_SIZE on 32bit platform should have the value 256,
 		// and on 64bit platform value 128 (256/2=128))
@@ -1369,10 +1371,7 @@ public:
 
 		if( pow.exponent>-int(man*TTMATH_BITS_PER_UINT) && pow.exponent<=0 )
 		{
-			Big<exp, man> pow_frac( pow );
-			pow_frac.RemainFraction();
-
-			if( pow_frac.IsZero() )
+			if( pow.IsInteger() )
 				return PowInt( pow );
 		}
 
@@ -2718,20 +2717,20 @@ public:
 
 		output:
 			return value:
-			0 - ok and 'result' will be an object of type tstr_t which holds the value
+			0 - ok and 'result' will be an object of type std::string (or std::wstring) which holds the value
 			1 - if there was a carry (shoudn't be in a normal situation - if is that means there
 			    is somewhere an error in the library)
 	*/
-	uint ToString(	tstr_t & result,
+	uint ToString(	tt_string & result,
 					uint base                  = 10,
 					bool always_scientific     = false,
 					sint when_scientific       = 15,
 					sint max_digit_after_comma = -1,
 					bool remove_trailing_zeroes = true,
-					tchar_t decimal_point = TTMATH_COMMA_CHARACTER_1 ) const
+					tt_char decimal_point = TTMATH_COMMA_CHARACTER_1 ) const
 	{										  
-		static tchar_t error_overflow_msg[] = TTMATH_TEXT("overflow");
-		static tchar_t error_nan_msg[]      = TTMATH_TEXT("NaN");
+		static tt_char error_overflow_msg[] = TTMATH_TEXT("overflow");
+		static tt_char error_nan_msg[]      = TTMATH_TEXT("NaN");
 		result.erase();
 		
 		if( IsNan() )
@@ -2748,7 +2747,7 @@ public:
 	
 		if( IsZero() )
 		{
-			result = TTMATH_TEXT("0");
+			result = '0';
 
 		return 0;
 		}
@@ -2873,7 +2872,7 @@ private:
 			but we need 'new'exp' as integer then we take:
 			new_exp = [log base (2^exponent)] + 1  <- where [x] means integer value from x
 	*/
-	uint ToString_CreateNewMantissaAndExponent(	tstr_t & new_man, uint base,
+	uint ToString_CreateNewMantissaAndExponent(	tt_string & new_man, uint base,
 												Int<exp+1> & new_exp) const
 	{
 	uint c = 0;
@@ -3057,7 +3056,7 @@ private:
 		(we can make that speciality when the base is 4,8 or 16 as well 
 		but maybe in further time)
 	*/
-	uint ToString_CreateNewMantissaAndExponent_Base2(	tstr_t & new_man,
+	uint ToString_CreateNewMantissaAndExponent_Base2(	tt_string & new_man,
 														Int<exp+1> & new_exp     ) const
 	{
 		for( sint i=man-1 ; i>=0 ; --i )
@@ -3087,13 +3086,13 @@ private:
 		this method roundes the last character from the new mantissa
 		(it's used in systems where the base is different from 2)
 	*/
-	uint ToString_RoundMantissa(tstr_t & new_man, uint base, Int<exp+1> & new_exp, tchar_t decimal_point) const
+	uint ToString_RoundMantissa(tt_string & new_man, uint base, Int<exp+1> & new_exp, tt_char decimal_point) const
 	{
 		// we must have minimum two characters
 		if( new_man.length() < 2 )
 			return 0;
 
-		tstr_t::size_type i = new_man.length() - 1;
+		tt_string::size_type i = new_man.length() - 1;
 
 		// we're erasing the last character
 		uint digit = UInt<man>::CharToDigit( new_man[i] );
@@ -3114,7 +3113,7 @@ private:
 
 		this method addes one into the new mantissa
 	*/
-	void ToString_RoundMantissa_AddOneIntoMantissa(tstr_t & new_man, uint base, tchar_t decimal_point) const
+	void ToString_RoundMantissa_AddOneIntoMantissa(tt_string & new_man, uint base, tt_char decimal_point) const
 	{
 		if( new_man.empty() )
 			return;
@@ -3138,7 +3137,7 @@ private:
 			else
 				was_carry = false;
 
-			new_man[i] = static_cast<char>( UInt<man>::DigitToChar(digit) );
+			new_man[i] = static_cast<tt_char>( UInt<man>::DigitToChar(digit) );
 		}
 
 		if( i<0 && was_carry )
@@ -3152,13 +3151,13 @@ private:
 		this method sets the comma operator and/or puts the exponent
 		into the string
 	*/
-	uint ToString_SetCommaAndExponent(	tstr_t & new_man, uint base,
+	uint ToString_SetCommaAndExponent(	tt_string & new_man, uint base,
 										Int<exp+1> & new_exp,
 										bool always_scientific,
 										sint when_scientific,
 										sint max_digit_after_comma,
 										bool remove_trailing_zeroes,
-										tchar_t decimal_point) const
+										tt_char decimal_point) const
 	{
 	uint carry = 0;
 
@@ -3198,12 +3197,12 @@ private:
 		an auxiliary method for converting into the string
 	*/
 	void ToString_SetCommaAndExponent_Normal(
-											tstr_t & new_man,
+											tt_string & new_man,
 											uint base, 
 											Int<exp+1> & new_exp,
 											sint max_digit_after_comma,
 											bool remove_trailing_zeroes,
-											tchar_t decimal_point) const
+											tt_char decimal_point) const
 	{
 		if( !new_exp.IsSign() ) //if( new_exp >= 0 )
 			return ToString_SetCommaAndExponent_Normal_AddingZero(new_man, new_exp);
@@ -3215,7 +3214,7 @@ private:
 	/*!
 		an auxiliary method for converting into the string
 	*/
-	void ToString_SetCommaAndExponent_Normal_AddingZero(tstr_t & new_man,
+	void ToString_SetCommaAndExponent_Normal_AddingZero(tt_string & new_man,
 																Int<exp+1> & new_exp) const
 	{
 		// we're adding zero characters at the end
@@ -3235,12 +3234,12 @@ private:
 		an auxiliary method for converting into the string
 	*/
 	void ToString_SetCommaAndExponent_Normal_SetCommaInside(
-														tstr_t & new_man,
+														tt_string & new_man,
 														uint base,
 														Int<exp+1> & new_exp,
 														sint max_digit_after_comma,
 														bool remove_trailing_zeroes,
-														tchar_t decimal_point) const
+														tt_char decimal_point) const
 	{
 		// new_exp is < 0 
 
@@ -3259,7 +3258,7 @@ private:
 			// we're adding zero characters before the mantissa
 
 			uint how_many = e - new_man_len;
-			tstr_t man_temp(how_many+1, '0');
+			tt_string man_temp(how_many+1, '0');
 
 			man_temp.insert( man_temp.begin()+1, decimal_point);
 			new_man.insert(0, man_temp);
@@ -3272,12 +3271,12 @@ private:
 	/*!
 		an auxiliary method for converting into the string
 	*/
-	void ToString_SetCommaAndExponent_Scientific(	tstr_t & new_man,
+	void ToString_SetCommaAndExponent_Scientific(	tt_string & new_man,
 													uint base,
 													Int<exp+1> & scientific_exp,
 													sint max_digit_after_comma,
 													bool remove_trailing_zeroes,
-													tchar_t decimal_point) const
+													tt_char decimal_point) const
 	{
 		if( new_man.empty() )
 			return;
@@ -3291,7 +3290,7 @@ private:
 			new_man += 'e';
 
 			if( !scientific_exp.IsSign() )
-				new_man += TTMATH_TEXT("+");
+				new_man += '+';
 		}
 		else
 		{
@@ -3300,7 +3299,7 @@ private:
 			new_man += TTMATH_TEXT("*10^");
 		}
 
-		tstr_t temp_exp;
+		tt_string temp_exp;
 		scientific_exp.ToString( temp_exp, base );
 
 		new_man += temp_exp;
@@ -3310,11 +3309,11 @@ private:
 	/*!
 		an auxiliary method for converting into the string
 	*/
-	void ToString_CorrectDigitsAfterComma(	tstr_t & new_man,
+	void ToString_CorrectDigitsAfterComma(	tt_string & new_man,
 											uint base,
 											sint max_digit_after_comma,
 											bool remove_trailing_zeroes,
-											tchar_t decimal_point) const
+											tt_char decimal_point) const
 	{
 		if( max_digit_after_comma >= 0 )
 			ToString_CorrectDigitsAfterComma_Round(new_man, base, max_digit_after_comma, decimal_point);
@@ -3328,8 +3327,8 @@ private:
 		an auxiliary method for converting into the string
 	*/
 	void ToString_CorrectDigitsAfterComma_CutOffZeroCharacters(
-												tstr_t & new_man,
-												tchar_t decimal_point) const
+												tt_string & new_man,
+												tt_char decimal_point) const
 	{
 		// minimum two characters
 		if( new_man.length() < 2 )
@@ -3347,7 +3346,7 @@ private:
 		// we must have a comma 
 		// (the comma can be removed by ToString_CorrectDigitsAfterComma_Round
 		// which is called before)
-		if( new_man.find_last_of(decimal_point, i) == tstr_t::npos )
+		if( new_man.find_last_of(decimal_point, i) == tt_string::npos )
 			return;
 
 		// if directly before the first zero is the comma operator
@@ -3363,26 +3362,26 @@ private:
 		an auxiliary method for converting into the string
 	*/
 	void ToString_CorrectDigitsAfterComma_Round(
-											tstr_t & new_man,
+											tt_string & new_man,
 											uint base,
 											sint max_digit_after_comma,
-											tchar_t decimal_point) const
+											tt_char decimal_point) const
 	{
 		// first we're looking for the comma operator
-		tstr_t::size_type index = new_man.find(decimal_point, 0);
+		tt_string::size_type index = new_man.find(decimal_point, 0);
 
-		if( index == tstr_t::npos )
+		if( index == tt_string::npos )
 			// nothing was found (actually there can't be this situation)
 			return;
 
 		// we're calculating how many digits there are at the end (after the comma)
 		// 'after_comma' will be greater than zero because at the end
 		// we have at least one digit
-		tstr_t::size_type after_comma = new_man.length() - index - 1;
+		tt_string::size_type after_comma = new_man.length() - index - 1;
 
 		// if 'max_digit_after_comma' is greater than 'after_comma' (or equal)
 		// we don't have anything for cutting
-		if( tstr_t::size_type(max_digit_after_comma) >= after_comma )
+		if( tt_string::size_type(max_digit_after_comma) >= after_comma )
 			return;
 
 		uint last_digit = UInt<man>::CharToDigit( new_man[ index + max_digit_after_comma + 1 ], base );
@@ -3418,6 +3417,7 @@ public:
 		all digits after the comma we can ignore
 
 		'source' - pointer to the string for parsing
+		           'const char*' or 'const wchar_t*'
 
 		if 'after_source' is set that when this method finishes
 		it sets the pointer to the new first character after parsed value
@@ -3428,7 +3428,7 @@ public:
 		no value has been read (there are no digits)
 		on other words if 'value_read' is true -- there is at least one digit in the string
 	*/
-	uint FromString(const tchar_t * source, uint base = 10, const tchar_t ** after_source = 0, bool * value_read = 0)
+	uint FromString(const tt_char * source, uint base = 10, const tt_char ** after_source = 0, bool * value_read = 0)
 	{
 	bool is_sign;
 	bool value_read_temp = false;
@@ -3479,7 +3479,7 @@ private:
 
 		(this method is used from 'FromString_ReadPartScientific' too)
 	*/
-	void FromString_TestSign( const tchar_t * & source, bool & is_sign )
+	void FromString_TestSign( const tt_char * & source, bool & is_sign )
 	{
 		UInt<man>::SkipWhiteCharacters(source);
 
@@ -3501,7 +3501,7 @@ private:
 	/*!
 		we're testing whether there's a comma operator
 	*/
-	bool FromString_TestCommaOperator(const tchar_t * & source)
+	bool FromString_TestCommaOperator(const tt_char * & source)
 	{
 		if( (*source == TTMATH_COMMA_CHARACTER_1) || 
 			(*source == TTMATH_COMMA_CHARACTER_2 && TTMATH_COMMA_CHARACTER_2 != 0 ) )
@@ -3519,7 +3519,7 @@ private:
 		this method reads the first part of a string
 		(before the comma operator)
 	*/
-	uint FromString_ReadPartBeforeComma( const tchar_t * & source, uint base, bool & value_read )
+	uint FromString_ReadPartBeforeComma( const tt_char * & source, uint base, bool & value_read )
 	{
 		sint character;
 		Big<exp, man> temp;
@@ -3548,7 +3548,7 @@ private:
 		this method reads the second part of a string
 		(after the comma operator)
 	*/
-	uint FromString_ReadPartAfterComma( const tchar_t * & source, uint base, bool & value_read )
+	uint FromString_ReadPartAfterComma( const tt_char * & source, uint base, bool & value_read )
 	{
 	sint character;
 	uint c = 0, index = 1;
@@ -3606,12 +3606,12 @@ private:
 
 		it is called when the base is 10 and some digits were read before
 	*/
-	int FromString_ReadScientificIfExists(const tchar_t * & source)
+	uint FromString_ReadScientificIfExists(const tt_char * & source)
 	{
 	uint c = 0;
 
 		bool scientific_read = false;
-		const tchar_t * before_scientific = source;
+		const tt_char * before_scientific = source;
 
 		if( FromString_TestScientific(source) )
 			c += FromString_ReadPartScientific( source, scientific_read );
@@ -3629,7 +3629,7 @@ private:
 
 		this character is only allowed when we're using the base equals 10
 	*/
-	bool FromString_TestScientific(const tchar_t * & source)
+	bool FromString_TestScientific(const tt_char * & source)
 	{
 		UInt<man>::SkipWhiteCharacters(source);
 
@@ -3648,7 +3648,7 @@ private:
 		this method reads the exponent (after 'e' character) when there's a scientific
 		format of value and only when we're using the base equals 10
 	*/
-	uint FromString_ReadPartScientific( const tchar_t * & source, bool & scientific_read )
+	uint FromString_ReadPartScientific( const tt_char * & source, bool & scientific_read )
 	{
 	uint c = 0;
 	Big<exp, man> new_exponent, temp;
@@ -3675,7 +3675,7 @@ private:
 		this method reads the value of the extra exponent when scientific format is used
 		(only when base == 10)
 	*/
-	uint FromString_ReadPartScientific_ReadExponent( const tchar_t * & source, Big<exp, man> & new_exponent, bool & scientific_read )
+	uint FromString_ReadPartScientific_ReadExponent( const tt_char * & source, Big<exp, man> & new_exponent, bool & scientific_read )
 	{
 	sint character;
 	Big<exp, man> base, temp;
@@ -3708,7 +3708,7 @@ public:
 	/*!
 		a method for converting a string into its value		
 	*/
-	uint FromString(const tstr_t & string, uint base = 10)
+	uint FromString(const tt_string & string, uint base = 10)
 	{
 		return FromString( string.c_str(), base );
 	}
@@ -3717,7 +3717,7 @@ public:
 	/*!
 		a constructor for converting a string into this class
 	*/
-	Big(const tchar_t * string)
+	Big(const tt_char * string)
 	{
 		FromString( string );
 	}
@@ -3726,7 +3726,7 @@ public:
 	/*!
 		a constructor for converting a string into this class
 	*/
-	Big(const tstr_t & string)
+	Big(const tt_string & string)
 	{
 		FromString( string.c_str() );
 	}
@@ -3735,7 +3735,7 @@ public:
 	/*!
 		an operator= for converting a string into its value
 	*/
-	Big<exp, man> & operator=(const tchar_t * string)
+	Big<exp, man> & operator=(const tt_char * string)
 	{
 		FromString( string );
 
@@ -3746,7 +3746,7 @@ public:
 	/*!
 		an operator= for converting a string into its value
 	*/
-	Big<exp, man> & operator=(const tstr_t & string)
+	Big<exp, man> & operator=(const tt_string & string)
 	{
 		FromString( string.c_str() );
 
@@ -3905,7 +3905,7 @@ public:
 				mandiff = man2;
 				mandiff.Sub(man1);
 				break;
-			case 0:
+			default:
 				if (man2 > man1)
 					{
 					mandiff = man2;
@@ -4175,6 +4175,47 @@ public:
 
 
 
+	/*!
+		this method returns true if the value is integer
+		(there is no a fraction)
+
+		(we don't check nan)
+	*/
+	bool IsInteger() const
+	{
+		if( IsZero() )
+			return true;
+
+		if( !exponent.IsSign() )
+			// exponent >=0 -- the value don't have any fractions
+			return true;
+
+		if( exponent <= -sint(man*TTMATH_BITS_PER_UINT) )
+			// the value is from (-1,1)
+			return false;
+
+		// exponent is in range (-man*TTMATH_BITS_PER_UINT, 0)
+		sint e = exponent.ToInt();
+		e = -e; // e means how many bits we must check
+
+		uint len  = e / TTMATH_BITS_PER_UINT;
+		uint rest = e % TTMATH_BITS_PER_UINT;
+		uint i    = 0;
+
+		for( ; i<len ; ++i )
+			if( mantissa.table[i] != 0 )
+				return false;
+
+		if( rest > 0 )
+		{
+			uint rest_mask = TTMATH_UINT_MAX_VALUE >> (TTMATH_BITS_PER_UINT - rest);
+			if( (mantissa.table[i] & rest_mask) != 0 )
+				return false;
+		}
+
+	return true;
+	}
+
 
 	/*!
 		this method rounds to the nearest integer value
@@ -4223,9 +4264,14 @@ public:
 	*
 	*/
 
-	friend tostrm_t & operator<<(tostrm_t & s, const Big<exp,man> & l)
+	/*!
+		output for standard streams
+
+		tt_ostream is either std::ostream or std::wostream
+	*/
+	friend tt_ostream & operator<<(tt_ostream & s, const Big<exp,man> & l)
 	{
-	tstr_t ss;
+	tt_string ss;
 
 		l.ToString(ss);
 		s << ss;
@@ -4234,12 +4280,17 @@ public:
 	}
 
 
-	friend tistrm_t & operator>>(tistrm_t & s, Big<exp,man> & l)
+	/*!
+		input from standard streams
+
+		tt_istream is either std::istream or std::wistream
+	*/
+	friend tt_istream & operator>>(tt_istream & s, Big<exp,man> & l)
 	{
-	tstr_t ss;
+	tt_string ss;
 	
-	// 'tchar_t' for operator>>
-	unsigned tchar_t z;
+	// 'tt_char' for operator>>
+	tt_char z;
 	bool was_comma = false;
 
 		// operator>> omits white characters if they're set for ommiting
@@ -4252,7 +4303,7 @@ public:
 		}
 
 		// we're reading only digits (base=10) and only one comma operator
-		for( ; s.good() ; z=s.get() )
+		for( ; s.good() ; z=static_cast<tt_char>(s.get()) )
 		{
 			if( z == TTMATH_COMMA_CHARACTER_1 ||
 			  ( z == TTMATH_COMMA_CHARACTER_2 && TTMATH_COMMA_CHARACTER_2 != 0 ) )

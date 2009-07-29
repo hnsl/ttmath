@@ -1,7 +1,7 @@
 /*
  * This file is a part of TTMath Mathematical Library
  * and is distributed under the (new) BSD licence.
- * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
+ * Author: Tomasz Sowa <t.sowa@ttmath.org>
  */
 
 /* 
@@ -47,6 +47,7 @@
 #include "ttmathtypes.h"
 
 #include <string>
+#include <vector>
 #include <list>
 #include <map>
 
@@ -73,18 +74,19 @@ public:
 	struct Item
 	{
 		// name of a variable of a function
-		tstr_t value;
+		// (either std::string or std::wstring)
+		tt_string value;
 
 		// number of parameters required by the function
 		// (if there's a variable this 'param' is ignored)
 		int param;
 
 		Item() {}
-		Item(const tstr_t & v, int p) : value(v), param(p) {}
+		Item(const tt_string & v, int p) : value(v), param(p) {}
 	};
 
 	// 'Table' is the type of our table
-	typedef std::map<tstr_t, Item> Table;
+	typedef std::map<tt_string, Item> Table;
 	typedef	Table::iterator Iterator;
 	typedef	Table::const_iterator CIterator;
 
@@ -112,7 +114,7 @@ public:
 	/*!
 		this method returns true if the name can be as a name of an object
 	*/
-	static bool IsNameCorrect(const tstr_t & name)
+	static bool IsNameCorrect(const tt_string & name)
 	{
 		if( name.empty() )
 			return false;
@@ -120,7 +122,7 @@ public:
 		if( !CorrectCharacter(name[0], false) )
 			return false;
 
-		tstr_t::const_iterator i=name.begin();
+		tt_string::const_iterator i=name.begin();
 
 		for(++i ; i!=name.end() ; ++i)
 			if( !CorrectCharacter(*i, true) )
@@ -133,7 +135,7 @@ public:
 	/*!
 		this method returns true if such an object is defined (name exists)
 	*/
-	bool IsDefined(const tstr_t & name)
+	bool IsDefined(const tt_string & name)
 	{
 		Iterator i = table.find(name);
 
@@ -148,7 +150,7 @@ public:
 	/*!
 		this method adds one object (variable of function) into the table
 	*/
-	ErrorCode Add(const tstr_t & name, const tstr_t & value, int param = 0)
+	ErrorCode Add(const tt_string & name, const tt_string & value, int param = 0)
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -205,7 +207,7 @@ public:
 	/*!
 		this method changes the value and the number of parameters for a specific object
 	*/
-	ErrorCode EditValue(const tstr_t & name, const tstr_t & value, int param = 0)
+	ErrorCode EditValue(const tt_string & name, const tt_string & value, int param = 0)
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -225,7 +227,7 @@ public:
 	/*!
 		this method changes the name of a specific object
 	*/
-	ErrorCode EditName(const tstr_t & old_name, const tstr_t & new_name)
+	ErrorCode EditName(const tt_string & old_name, const tt_string & new_name)
 	{
 		if( !IsNameCorrect(old_name) || !IsNameCorrect(new_name) )
 			return err_incorrect_name;
@@ -256,7 +258,7 @@ public:
 	/*!
 		this method deletes an object
 	*/
-	ErrorCode Delete(const tstr_t & name)
+	ErrorCode Delete(const tt_string & name)
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -275,7 +277,7 @@ public:
 	/*!
 		this method gets the value of a specific object
 	*/
-	ErrorCode GetValue(const tstr_t & name, tstr_t & value) const
+	ErrorCode GetValue(const tt_string & name, tt_string & value) const
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -298,7 +300,7 @@ public:
 		this method gets the value of a specific object
 		(this version is used for not copying the whole string)
 	*/
-	ErrorCode GetValue(const tstr_t & name, const tchar_t ** value) const
+	ErrorCode GetValue(const tt_string & name, const tt_char ** value) const
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -321,7 +323,7 @@ public:
 		this method gets the value and the number of parameters
 		of a specific object
 	*/
-	ErrorCode GetValueAndParam(const tstr_t & name, tstr_t & value, int * param) const
+	ErrorCode GetValueAndParam(const tt_string & name, tt_string & value, int * param) const
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -347,7 +349,7 @@ public:
 		of a specific object
 		(this version is used for not copying the whole string)
 	*/
-	ErrorCode GetValueAndParam(const tstr_t & name, const tchar_t ** value, int * param) const
+	ErrorCode GetValueAndParam(const tt_string & name, const tt_char ** value, int * param) const
 	{
 		if( !IsNameCorrect(name) )
 			return err_incorrect_name;
@@ -430,7 +432,7 @@ public:
 	*/
 	History()
 	{
-		buffer_max_size = 10;
+		buffer_max_size = 15;
 	}
 
 
@@ -487,9 +489,116 @@ public:
 	return false;
 	}
 
-	TTMATH_IMPLEMENT_THREADSAFE_OBJ	
+
+	/*!
+		this methods deletes an item
+
+		we assume that there is only one item with the 'key'
+		(this methods removes the first one)
+	*/
+	bool Remove(const ValueType & key)
+	{
+		typename buffer_type::iterator i = buffer.begin();
+
+		for( ; i != buffer.end() ; ++i )
+		{
+			if( i->key == key )
+			{
+				buffer.erase(i);
+				return true;
+			}
+		}
+
+	return false;
+	}
+
+
 }; // end of class History
 
+
+
+/*!
+	this is an auxiliary class used when calculating Gamma() or Factorial()
+
+	in multithreaded environment you can provide an object of this class to
+	the Gamma() or Factorial() function, e.g;
+		typedef Big<1, 3> MyBig;
+		MyBig x = 123456;
+		CGamma<MyBig> cgamma;
+		std::cout << Gamma(x, cgamma);
+	each thread should have its own CGamma<> object
+
+	in a single-thread environment a CGamma<> object is a static variable
+	in a second version of Gamma() and you don't have to explicitly use it, e.g.
+		typedef Big<1, 3> MyBig;
+		MyBig x = 123456;
+		std::cout << Gamma(x);
+*/
+template<class ValueType>
+struct CGamma
+{
+	/*!
+		this table holds factorials
+			1
+			1
+			2
+			6
+			24
+			120
+			720
+			.......
+	*/
+	std::vector<ValueType> fact;
+
+
+	/*!
+		this table holds Bernoulli numbers
+			1
+			-0.5
+			0.166666666666666666666666667
+			0
+			-0.0333333333333333333333333333
+			0
+			0.0238095238095238095238095238
+			0
+			-0.0333333333333333333333333333
+			0
+			0.075757575757575757575757576
+			.....
+	*/
+	std::vector<ValueType> bern;
+
+
+	/*!
+		here we store some calculated values
+		(this is for speeding up, if the next argument of Gamma() or Factorial()
+		is in the 'history' then the result we are not calculating but simply
+		return from the 'history' object)
+	*/
+	History<ValueType> history;
+
+
+	/*!
+		this method prepares some coefficients: factorials and Bernoulli numbers
+		stored in 'fact' and 'bern' objects
+		
+		how many values should be depends on the size of the mantissa - if
+		the mantissa is larger then we must calculate more values
+		    for a mantissa which consists of 256 bits (8 words on a 32bit platform)
+			we have to calculate about 30 values (the size of fact and bern will be 30),
+			and for a 2048 bits mantissa we have to calculate 306 coefficients
+
+		you don't have to call this method, these coefficients will be automatically calculated
+		when they are needed
+
+		you must note that calculating of the coefficients is a little time-consuming operation,
+		(especially when the mantissa is large) and first called to Gamma() or Factorial()
+		can take more time than next calls, and in the end this is the point when InitAll()
+		comes in handy: you can call this method somewhere at the beginning of your program
+	*/
+	void InitAll();
+	// definition is in ttmath.h
+};
 
 
 

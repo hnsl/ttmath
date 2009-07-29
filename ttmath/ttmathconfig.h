@@ -35,26 +35,6 @@
 
 namespace ttmath
 {
-	#if defined(TTMATH_USE_WCHAR)
-		typedef	wchar_t					tchar_t;
-		typedef	std::wstring			tstr_t;
-		typedef std::wostringstream		tostrstrm_t;
-		typedef std::wostream			tostrm_t;
-		typedef std::wistream			tistrm_t;
-
-		#define __TTMATH_TEXT(quote) 	L ## quote
-	#else
-		typedef	char					tchar_t;
-		typedef	std::string				tstr_t;
-		typedef std::ostringstream		tostrstrm_t;
-		typedef std::ostream			tostrm_t;
-		typedef std::istream			tistrm_t;
-
-		#define __TTMATH_TEXT(quote) 	quote
-	#endif
-
-	#define TTMATH_TEXT(quote) 	__TTMATH_TEXT(quote)
-	
 #if defined(WIN32)
 	#include <windows.h>
 	

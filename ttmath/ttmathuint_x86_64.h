@@ -1,7 +1,7 @@
 /*
  * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
- * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
+ * Author: Tomasz Sowa <t.sowa@ttmath.org>
  */
 
 /*
@@ -118,7 +118,7 @@ namespace ttmath
 			__asm__ __volatile__(
 
 				"xorq %%rdx, %%rdx				\n"
-				"neg %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
+				"negq %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
 
 			"1:									\n"
 				"movq (%%rsi,%%rdx,8), %%rax	\n"
@@ -136,7 +136,7 @@ namespace ttmath
 
 		#endif
 
-		TTMATH_LOG("UInt64::Add")
+		TTMATH_LOG("UInt::Add")
 
 	return c;
 	}
@@ -161,7 +161,7 @@ namespace ttmath
 			table[1] = 30 + 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[3] it would be returned
+		of course if there was a carry from table[2] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::AddInt(uint value, uint index)
@@ -201,12 +201,12 @@ namespace ttmath
 				"movzx %%al, %%rdx				\n"
 
 				: "=d" (c), "=a" (dummy), "=c" (dummy2)
-				: "a" (value), "c" (b), "0" (index), "b" (p1)
+				: "0" (index), "1" (value),  "2" (b), "b" (p1)
 				: "cc", "memory" );
 
 		#endif
 
-		TTMATH_LOG("UInt64::AddInt")
+		TTMATH_LOG("UInt::AddInt")
 
 	return c;
 	}
@@ -318,13 +318,12 @@ namespace ttmath
 				"movzx %%al, %%rax				\n"
 
 				: "=a" (c), "=c" (dummy), "=d" (dummy2)
-				: "1" (b), "2" (index), "b" (p1), "S" (x1), "0" (x2)
+				: "0" (x2), "1" (b),      "2" (index), "b" (p1), "S" (x1)
 				: "cc", "memory" );
 
 		#endif
 
-
-		TTMATH_LOG("UInt64::AddTwoInts")
+		TTMATH_LOG("UInt::AddTwoInts")
 
 	return c;
 	}
@@ -368,7 +367,7 @@ namespace ttmath
 			__asm__  __volatile__(
 
 				"xorq %%rdx, %%rdx				\n"
-				"neg %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
+				"negq %%rax						\n"     // CF=1 if rax!=0 , CF=0 if rax==0
 
 			"1:									\n"
 				"movq (%%rsi,%%rdx,8), %%rax	\n"
@@ -387,7 +386,7 @@ namespace ttmath
 
 		#endif
 
-		TTMATH_LOG("UInt64::Sub")
+		TTMATH_LOG("UInt::Sub")
 
 	return c;
 	}
@@ -410,7 +409,7 @@ namespace ttmath
 			table[1] = 30 - 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[3] it would be returned
+		of course if there was a carry from table[2] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::SubInt(uint value, uint index)
@@ -449,8 +448,8 @@ namespace ttmath
 				"setc %%al						\n"
 				"movzx %%al, %%rdx				\n"
 
-				: "=d" (c), "=a" (dummy), "=c" (dummy2)
-				: "1" (value), "2" (b), "0" (index), "b" (p1)
+				: "=d" (c),    "=a" (dummy), "=c" (dummy2)
+				: "0" (index), "1" (value),  "2" (b), "b" (p1)
 				: "cc", "memory" );
 
 		#endif
@@ -495,7 +494,7 @@ namespace ttmath
 		__asm__  __volatile__(
 
 			"xorq %%rdx, %%rdx			\n"   // rdx=0
-			"neg %%rax					\n"   // CF=1 if rax!=0 , CF=0 if rax==0
+			"negq %%rax					\n"   // CF=1 if rax!=0 , CF=0 if rax==0
 
 		"1:								\n"
 			"rclq $1, (%%rbx, %%rdx, 8)	\n"
@@ -507,12 +506,12 @@ namespace ttmath
 			"adcq %%rcx, %%rcx			\n"
 
 			: "=c" (c), "=a" (dummy), "=d" (dummy2)
-			: "1" (c), "0" (b), "b" (p1)
+			: "0" (b),  "1" (c), "b" (p1)
 			: "cc", "memory" );
 
 		#endif
 
-		TTMATH_LOG("UInt64::Rcl2_one")
+		TTMATH_LOG("UInt::Rcl2_one")
 
 	return c;
 	}
@@ -551,7 +550,7 @@ namespace ttmath
 
 		__asm__  __volatile__(
 
-			"neg %%rax						\n"   // CF=1 if rax!=0 , CF=0 if rax==0
+			"negq %%rax						\n"   // CF=1 if rax!=0 , CF=0 if rax==0
 
 		"1:									\n"
 			"rcrq $1, -8(%%rbx, %%rcx, 8)	\n"
@@ -562,12 +561,12 @@ namespace ttmath
 			"adcq %%rcx, %%rcx				\n"
 
 			: "=c" (c), "=a" (dummy)
-			: "1" (c), "0" (b), "b" (p1)
+			: "0" (b),  "1" (c), "b" (p1)
 			: "cc", "memory" );
 
 		#endif
 
-		TTMATH_LOG("UInt64::Rcr2_one")
+		TTMATH_LOG("UInt::Rcr2_one")
 
 	return c;
 	}
@@ -644,7 +643,7 @@ namespace ttmath
 
 		#endif
 
-		TTMATH_LOG("UInt64::Rcl2")
+		TTMATH_LOG("UInt::Rcl2")
 
 	return c;
 	}
@@ -724,14 +723,14 @@ namespace ttmath
 
 		#endif
 
-		TTMATH_LOG("UInt64::Rcr2")
+		TTMATH_LOG("UInt::Rcr2")
 
 	return c;
 	}
 
 
 	/*
-		this method returns the number of the highest set bit in one 32-bit word
+		this method returns the number of the highest set bit in one 64-bit word
 		if the 'x' is zero this method returns '-1'
 
 		***this method is created only on a 64bit platform***
@@ -755,16 +754,17 @@ namespace ttmath
 		#endif
 
 		#ifdef __GNUC__
-			__asm__  __volatile__(
+		uint dummy;
 
-			"bsrq %1, %0		\n"
-			"jnz 1f				\n"
-			"movq $-1, %0		\n"
-			"1:					\n"
+				__asm__ (
 
-			: "=R" (result)
-			: "R" (x)
-			: "cc" );
+				"movq $-1, %1          \n"
+				"bsrq %2, %0           \n"
+				"cmovz %1, %0          \n"
+
+				: "=r" (result), "=&r" (dummy)
+				: "r" (x)
+				: "cc" );
 
 		#endif
 
@@ -808,15 +808,15 @@ namespace ttmath
 		#endif
 
 		#ifdef __GNUC__
-			__asm__  __volatile__(
+
+			__asm__ (
 
 			"btsq %%rbx, %%rax		\n"
-
 			"setc %%bl				\n"
 			"movzx %%bl, %%rbx		\n"
-
+			
 			: "=a" (v), "=b" (old_bit)
-			: "0" (v), "1" (bit)
+			: "0" (v),  "1" (bit)
 			: "cc" );
 
 		#endif
@@ -836,18 +836,17 @@ namespace ttmath
 
 
 	/*!
-		multiplication: result2:result1 = a * b
-		result2 - higher word
-		result1 - lower word of the result
+		multiplication: result_high:result_low = a * b
+		result_high - higher word of the result
+		result_low  - lower word of the result
 
 		this methos never returns a carry
+		this method is used in the second version of the multiplication algorithms
 
 		***this method is created only on a 64bit platform***
-
-		it is an auxiliary method for version two of the multiplication algorithm
 	*/
 	template<uint value_size>
-	void UInt<value_size>::MulTwoWords(uint a, uint b, uint * result2, uint * result1)
+	void UInt<value_size>::MulTwoWords(uint a, uint b, uint * result_high, uint * result_low)
 	{
 	/*
 		we must use these temporary variables in order to inform the compilator
@@ -856,8 +855,8 @@ namespace ttmath
 		this has no effect in visual studio but it's usefull when
 		using gcc and options like -O
 	*/
-	register uint result1_;
-	register uint result2_;
+	uint result1_;
+	uint result2_;
 
 		#ifndef __GNUC__
 			#if defined(_MSC_VER)
@@ -869,19 +868,19 @@ namespace ttmath
 
 		#ifdef __GNUC__
 
-		__asm__ __volatile__(
-
+		__asm__ (
+		
 			"mulq %%rdx			\n"
 
 			: "=a" (result1_), "=d" (result2_)
-			: "0" (a), "1" (b)
+			: "0" (a),         "1" (b)
 			: "cc" );
 
 		#endif
 
 
-		*result1 = result1_;
-		*result2 = result2_;
+		*result_low  = result1_;
+		*result_high = result2_;
 	}
 
 
@@ -912,8 +911,8 @@ namespace ttmath
 	template<uint value_size>
 	void UInt<value_size>::DivTwoWords(uint a,uint b, uint c, uint * r, uint * rest)
 	{
-		register uint r_;
-		register uint rest_;
+		uint r_;
+		uint rest_;
 		/*
 			these variables have similar meaning like those in
 			the multiplication algorithm MulTwoWords
@@ -932,8 +931,8 @@ namespace ttmath
 		#endif
 
 		#ifdef __GNUC__
-
-			__asm__ __volatile__(
+		
+			__asm__ (
 
 			"divq %%rcx				\n"
 

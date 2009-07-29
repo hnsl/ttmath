@@ -1,7 +1,7 @@
 /*
  * This file is a part of TTMath Bignum Library
  * and is distributed under the (new) BSD licence.
- * Author: Tomasz Sowa <t.sowa@slimaczek.pl>
+ * Author: Tomasz Sowa <t.sowa@ttmath.org>
  */
 
 /* 
@@ -38,16 +38,17 @@
 #ifndef headerfilettmathuint_noasm
 #define headerfilettmathuint_noasm
 
+
 #ifdef TTMATH_NOASM
 
+#pragma message("TTMATH_NOASM")
+
 /*!
-	\file ttmathuint.h
+	\file ttmathuint_noasm.h
     \brief template class UInt<uint> with methods without any assembler code
 
 	this file is included at the end of ttmathuint.h
 */
-
-#pragma message("TTMATH_NOASM")
 
 
 namespace ttmath
@@ -117,7 +118,7 @@ namespace ttmath
 			table[1] = 30 + 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[3] it would be returned
+		of course if there was a carry from table[2] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::AddInt(uint value, uint index)
@@ -176,7 +177,7 @@ namespace ttmath
 	{
 	uint i, c;
 
-		TTMATH_ASSERT( index < value_size )
+		TTMATH_ASSERT( index < value_size - 1 )
 
 
 		c = AddTwoWords(table[index],   x1, 0, &table[index]);
@@ -189,6 +190,47 @@ namespace ttmath
 	
 	return c;
 	}
+
+
+
+	/*!
+		this static method addes one vector to the other
+		'ss1' is larger in size or equal to 'ss2'
+
+		ss1 points to the first (larger) vector
+		ss2 points to the second vector
+		ss1_size - size of the ss1 (and size of the result too)
+		ss2_size - size of the ss2
+		result - is the result vector (which has size the same as ss1: ss1_size)
+
+		Example:  ss1_size is 5, ss2_size is 3
+		ss1:      ss2:   result (output):
+		  5        1         5+1
+		  4        3         4+3
+		  2        7         2+7
+		  6                  6
+		  9                  9
+	  of course the carry is propagated and will be returned from the last item
+	  (this method is used by the Karatsuba multiplication algorithm)
+	*/
+	template<uint value_size>
+	uint UInt<value_size>::AddVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
+	{
+	uint i, c = 0;
+
+		TTMATH_ASSERT( ss1_size >= ss2_size )
+		
+		for(i=0 ; i<ss2_size ; ++i)
+			c = AddTwoWords(ss1[i], ss2[i], c, &result[i]);
+
+		for( ; i<ss1_size ; ++i)
+			c = AddTwoWords(ss1[i], 0, c, &result[i]);
+
+		TTMATH_LOG("UInt::AddVector")
+
+	return c;
+	}
+
 
 
 
@@ -256,7 +298,7 @@ namespace ttmath
 			table[1] = 30 - 2;
 			table[2] = 5;
 
-		of course if there was a carry from table[3] it would be returned
+		of course if there was a carry from table[2] it would be returned
 	*/
 	template<uint value_size>
 	uint UInt<value_size>::SubInt(uint value, uint index)
@@ -276,6 +318,45 @@ namespace ttmath
 	return c;
 	}
 
+
+	/*!
+		this static method subtractes one vector from the other
+		'ss1' is larger in size or equal to 'ss2'
+
+		ss1 points to the first (larger) vector
+		ss2 points to the second vector
+		ss1_size - size of the ss1 (and size of the result too)
+		ss2_size - size of the ss2
+		result - is the result vector (which has size the same as ss1: ss1_size)
+
+		Example:  ss1_size is 5, ss2_size is 3
+		ss1:      ss2:   result (output):
+		  5        1         5-1
+		  4        3         4-3
+		  2        7         2-7
+		  6                  6-1  (the borrow from previous item)
+		  9                  9
+		                 return (carry): 0
+	  of course the carry (borrow) is propagated and will be returned from the last item
+	  (this method is used by the Karatsuba multiplication algorithm)
+	*/
+	template<uint value_size>
+	uint UInt<value_size>::SubVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
+	{
+	uint i, c = 0;
+
+		TTMATH_ASSERT( ss1_size >= ss2_size )
+		
+		for(i=0 ; i<ss2_size ; ++i)
+			c = SubTwoWords(ss1[i], ss2[i], c, &result[i]);
+
+		for( ; i<ss1_size ; ++i)
+			c = SubTwoWords(ss1[i], 0, c, &result[i]);
+
+		TTMATH_LOG("UInt::SubVector")
+
+	return c;
+	}
 
 
 
@@ -474,8 +555,8 @@ namespace ttmath
 
 		uint mask = 1;
 
-		while( bit-- > 0 )
-			mask = mask << 1;
+		if( bit > 1 )
+			mask = mask << bit;
 
 		uint last = value & mask;
 		value     = value | mask;
@@ -602,7 +683,6 @@ namespace ttmath
 	*/
 	
 
-	// !! maybe returns something? a carry? or when c is zero?
 	/*!
 		this method calculates 64bits word a:b / 32bits c (a higher, b lower word)
 		r = a:b / c and rest - remainder
@@ -649,10 +729,6 @@ namespace ttmath
 		{
 			*r    = b / c;
 			*rest = b % c;
-
-#ifdef TTMATH_WARTOWNIK
-			++tester_wartownik1; // !!!!! skasowac
-#endif
 		}
 		else
 		if( c_.u_.high == 0 )
@@ -675,10 +751,6 @@ namespace ttmath
 			*rest        = temp2.u % c;
 
 			*r = res_.u;
-#ifdef TTMATH_WARTOWNIK
-			++tester_wartownik2; // !!!!! skasowac
-#endif
-
 		}
 		else
 		{
@@ -691,6 +763,13 @@ namespace ttmath
 
 #ifdef TTMATH_PLATFORM64
 
+
+	/*!
+		this method is available only on 64bit platforms
+		
+		the same algorithm like the third division algorithm in ttmathuint.h
+		but now with the radix=2^32
+	*/
 	template<uint value_size>
 	void UInt<value_size>::DivTwoWords2(uint a, uint b, uint c, uint * r, uint * rest)
 	{
@@ -705,7 +784,6 @@ namespace ttmath
 		c_.u  = c;
 
 		// normalizing
-		// a0 will actually not be used
 		uint d = DivTwoWordsNormalize(a_, b_, c_);
 
 		// loop from j=1 to j=0
@@ -749,12 +827,7 @@ namespace ttmath
 			a_.u = a_.u << 1; // carry bits from 'a' are simply skipped 
 
 			if( bc )
-			{
 				a_.u = a_.u | 1;
-	#ifdef TTMATH_WARTOWNIK
-				++tester_wartownik3; // !!!!! skasowac
-	#endif
-			}
 		}
 
 	return d;
@@ -803,23 +876,11 @@ namespace ttmath
 
 			if( decrease )
 			{
-				#ifdef TTMATH_WARTOWNIK
-				++tester_wartownik4; // !!!!! skasowac
-				#endif
-
 				--qp_.u;
 				rp_.u += v_.u_.high;
 
 				if( rp_.u_.high == 0 ) 
-				{
 					next_test = true;
-
-					#ifdef TTMATH_WARTOWNIK
-					++tester_wartownik5; // !!!!! skasowac
-					#endif
-				}
-
-				
 			}
 		}
 		while( next_test );
@@ -850,102 +911,17 @@ namespace ttmath
 		temp_.u_.low  = u_.u_.high;
 		c = SubTwoWords(temp_.u, res_high, c, &sub_res_high_.u);
 
-#ifdef TTMATH_WARTOWNIK
-		++tester_wartownik6; // !!!!! skasowac
-#endif
-
 		if( c )
 		{
 			--q;
 
 			c = AddTwoWords(sub_res_low_.u, v_.u, 0, &sub_res_low_.u);
 			AddTwoWords(sub_res_high_.u, 0, c, &sub_res_high_.u);
-
-			#ifdef TTMATH_WARTOWNIK
-			++tester_wartownik7; // !!!!! skasowac
-			#endif
 		}
 
 		u_.u_.high = sub_res_high_.u_.low;
 		u_.u_.low  = sub_res_low_.u_.high;
 		u3         = sub_res_low_.u_.low;
-	}
-
-	/*!
-		this static method addes one vector to the other
-		'ss1' is larger in size or equal to 'ss2'
-
-		ss1 points to the first (larger) vector
-		ss2 points to the second vector
-		ss1_size - size of the ss1 (and size of the result too)
-		ss2_size - size of the ss2
-		result - is the result vector (which has size the same as ss1: ss1_size)
-
-		Example:  ss1_size is 5, ss2_size is 3
-		ss1:      ss2:   result (output):
-		  5        1         5+1
-		  4        3         4+3
-		  2        7         2+7
-		  6                  6
-		  9                  9
-	  of course the carry is propagated and will be returned from the last item
-	  (this method is used by the Karatsuba multiplication algorithm)
-	*/
-	template<uint value_size>
-	uint UInt<value_size>::AddVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
-	{
-	uint i, c = 0;
-
-		TTMATH_ASSERT( ss1_size >= ss2_size )
-		
-		for(i=0 ; i<ss2_size ; ++i)
-			c = AddTwoWords(ss1[i], ss2[i], c, &result[i]);
-
-		for( ; i<ss1_size ; ++i)
-			c = AddTwoWords(ss1[i], 0, c, &result[i]);
-
-		TTMATH_LOG("UInt::AddVector")
-
-	return c;
-	}
-
-	/*!
-		this static method subtractes one vector from the other
-		'ss1' is larger in size or equal to 'ss2'
-
-		ss1 points to the first (larger) vector
-		ss2 points to the second vector
-		ss1_size - size of the ss1 (and size of the result too)
-		ss2_size - size of the ss2
-		result - is the result vector (which has size the same as ss1: ss1_size)
-
-		Example:  ss1_size is 5, ss2_size is 3
-		ss1:      ss2:   result (output):
-		  5        1         5-1
-		  4        3         4-3
-		  2        7         2-7
-		  6                  6-1  (the borrow from previous item)
-		  9                  9
-		                 return (carry): 0
-	  of course the carry (borrow) is propagated and will be returned from the last item
-	  (this method is used by the Karatsuba multiplication algorithm)
-	*/
-	template<uint value_size>
-	uint UInt<value_size>::SubVector(const uint * ss1, const uint * ss2, uint ss1_size, uint ss2_size, uint * result)
-	{
-	uint i, c = 0;
-
-		TTMATH_ASSERT( ss1_size >= ss2_size )
-		
-		for(i=0 ; i<ss2_size ; ++i)
-			c = SubTwoWords(ss1[i], ss2[i], c, &result[i]);
-
-		for( ; i<ss1_size ; ++i)
-			c = SubTwoWords(ss1[i], 0, c, &result[i]);
-
-		TTMATH_LOG("UInt::SubVector")
-
-	return c;
 	}
 
 #endif // #ifdef TTMATH_PLATFORM64
@@ -957,3 +933,7 @@ namespace ttmath
 
 #endif //ifdef TTMATH_NOASM
 #endif
+
+
+
+
