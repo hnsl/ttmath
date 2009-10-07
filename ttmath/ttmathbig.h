@@ -4160,9 +4160,11 @@ public:
 	{
 	std::string ss;
 	
-	// 'char' for operator>>
-	unsigned char z;
+	// char for operator>>
+	char z, old_z;
 	bool was_comma = false;
+	bool was_e     = false;
+	
 
 		// operator>> omits white characters if they're set for ommiting
 		s >> z;
@@ -4172,25 +4174,44 @@ public:
 			ss += z;
 			s >> z; // we're reading a next character (white characters can be ommited)
 		}
+		
+		old_z = 0;
 
 		// we're reading only digits (base=10) and only one comma operator
-		for( ; s.good() ; z=s.get() )
+		for( ; s.good() ; z=static_cast<char>(s.get()) )
 		{
 			if( z == TTMATH_COMMA_CHARACTER_1 ||
 			  ( z == TTMATH_COMMA_CHARACTER_2 && TTMATH_COMMA_CHARACTER_2 != 0 ) )
 			{
-				if( was_comma )
-					// second comma operator
+				if( was_comma || was_e )
+					// second comma operator or comma operator after 'e' character
 					break;
 
 				was_comma = true;
+			}
+			else
+			if( z == 'e' || z == 'E' )
+			{
+				if( was_e )
+					// second 'e' character
+					break;
+
+				was_e = true;
+			}
+			else
+			if( z == '+' || z == '-' )
+			{
+				if( old_z != 'e' && old_z != 'E' )
+					// '+' or '-' is allowed only after 'e' character
+					break;
 			}
 			else
 			if( UInt<man>::CharToDigit(z, 10) < 0 )
 				break;
 
 
-			ss += z;
+			ss   += z;
+			old_z = z;
 		}
 
 		// we're leaving the last read character

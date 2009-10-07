@@ -768,8 +768,7 @@ public:
 		{
 			MulTwoWords(u.table[x1], ss2, &r2, &r1 );
 			
-			
-			if( x1 <= value_size - 2 )
+			if( value_size>1 && x1<=value_size-2  )
 			{
 				if( AddTwoInts(r2,r1,x1) )
 					return 1;

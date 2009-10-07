@@ -1,3 +1,16 @@
+Version 0.8.6 prerelease (2009.10.07):
+    * fixed:   UInt::SetBitInWord(uint & value, uint bit) set 1 if the bit was
+               equal 1 (should be set 2)
+               this affected only no-asm parts - when macro TTMATH_NOASM was defined
+    * fixed:   UInt<value_size>::MulInt(uint ss2)
+               there was a buffer overflow when value_size was equal 1
+    * fixed:   UInt::AddVector() and UInt::SubVector() didn't want to compile
+               when macro TTMATH_NOASM was defined
+    * fixed:   Big::operator>> didn't correctly recognize values in scientific mode (with 'e' character)
+    * fixed:   Int::FromString(const tt_string & s, uint b = 10)
+               didn't use 'b' (always was '10')
+
+
 Version 0.8.5 (2009.06.16):
     * fixed:   Big::Mod(x) didn't correctly return a carry
                and the result was sometimes very big (even greater than x)

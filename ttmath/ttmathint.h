@@ -963,7 +963,7 @@ public:
 	*/
 	uint FromString(const std::string & s, uint b = 10)
 	{
-		return FromString( s.c_str() );
+		return FromString( s.c_str(), b );
 	}
 
 

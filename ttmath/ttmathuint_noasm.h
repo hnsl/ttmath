@@ -224,7 +224,7 @@ namespace ttmath
 		for( ; i<ss1_size ; ++i)
 			c = AddTwoWords(ss1[i], 0, c, &result[i]);
 
-		TTMATH_LOG("UInt::AddVector")
+		//TTMATH_LOG("UInt::AddVector")
 
 	return c;
 	}
@@ -351,7 +351,7 @@ namespace ttmath
 		for( ; i<ss1_size ; ++i)
 			c = SubTwoWords(ss1[i], 0, c, &result[i]);
 
-		TTMATH_LOG("UInt::SubVector")
+		//TTMATH_LOG("UInt::SubVector")
 
 	return c;
 	}
@@ -553,7 +553,7 @@ namespace ttmath
 
 		uint mask = 1;
 
-		if( bit > 1 )
+		if( bit > 0 )
 			mask = mask << bit;
 
 		uint last = value & mask;
