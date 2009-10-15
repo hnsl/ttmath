@@ -9,6 +9,7 @@ Version 0.8.6 prerelease (2009.10.07):
     * fixed:   Big::operator>> didn't correctly recognize values in scientific mode (with 'e' character)
     * fixed:   Int::FromString(const tt_string & s, uint b = 10)
                didn't use 'b' (always was '10')
+    * fixed:   buffer overflow in Big::ToInt(Int<int_size> & result)
 
 
 Version 0.8.5 (2009.06.16):

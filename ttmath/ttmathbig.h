@@ -1887,6 +1887,7 @@ public:
 		if( exponent > maxbit + sint(int_size*TTMATH_BITS_PER_UINT) )
 			// if exponent > (maxbit + sint(int_size*TTMATH_BITS_PER_UINT)) the value can't be passed
 			// into the 'Int<int_size>' type (it's too big)
+			return 1;
 
 		if( exponent <= maxbit )
 			// our value is from range (-1,1) and we return zero
