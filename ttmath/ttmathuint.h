@@ -2196,32 +2196,27 @@ public:
 		UInt<value_size> start(*this), start_temp;
 		UInt<value_size> result;
 		result.SetOne();
-
-		while( !pow.IsZero() )
+		uint c = 0;
+		
+		while( !c )
 		{
 			if( pow.table[0] & 1 )
-				if( result.Mul(start) )
-				{
-					TTMATH_LOG("UInt::Pow(UInt<>)")
-					return 1;
-				}
+				c += result.Mul(start);
+
+			pow.Rcr2_one(0);
+			if( pow.IsZero() )
+				break;
 
 			start_temp = start;
 			// in the second Mul algorithm we can use start.Mul(start) directly (there is no TTMATH_ASSERT_REFERENCE there)
-			if( start.Mul(start_temp) )
-			{
-				TTMATH_LOG("UInt::Pow(UInt<>)")
-				return 1;
-			}
-
-			pow.Rcr2_one(0);
+			c += start.Mul(start_temp);
 		}
 
 		*this = result;
 
 		TTMATH_LOG("UInt::Pow(UInt<>)")
 
-	return 0;
+	return (c==0)? 0 : 1;
 	}
 
 

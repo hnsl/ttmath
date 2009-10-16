@@ -1,4 +1,4 @@
-Version 0.8.6 prerelease (2009.10.07):
+Version 0.8.6 prerelease (2009.10.16):
     * fixed:   UInt::SetBitInWord(uint & value, uint bit) set 1 if the bit was
                equal 1 (should be set 2)
                this affected only no-asm parts - when macro TTMATH_NOASM was defined
@@ -10,6 +10,12 @@ Version 0.8.6 prerelease (2009.10.07):
     * fixed:   Int::FromString(const tt_string & s, uint b = 10)
                didn't use 'b' (always was '10')
     * fixed:   buffer overflow in Big::ToInt(Int<int_size> & result)
+    * fixed:   powering algorithm in:
+               UInt::Pow(UInt<value_size> pow)
+               Big::Pow(UInt<pow_size> pow)
+               Big::PowUInt(Big<exp, man> pow)
+               when 'pow' was sufficient large the algorithm returned carry
+               but the result could have been calculated correctly
 
 
 Version 0.8.5 (2009.06.16):
