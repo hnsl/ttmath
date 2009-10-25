@@ -1,4 +1,4 @@
-Version 0.8.6 prerelease (2009.10.16):
+Version 0.8.6 (2009.10.25):
     * fixed:   UInt::SetBitInWord(uint & value, uint bit) set 1 if the bit was
                equal 1 (should be set 2)
                this affected only no-asm parts - when macro TTMATH_NOASM was defined
